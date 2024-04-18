@@ -7,16 +7,19 @@ class ClientHandler implements Runnable{
     private static ArrayList<ClientHandler> allClients = new ArrayList<>();
     private static ArrayList<Account> allRegisteredAccounts = new ArrayList<>();
     private static Gson gson = new Gson();
+    Account userAccount;
+    private Socket clientSocket;
+    private BufferedWriter out;
+    private BufferedReader in;
+    
     static {
         Account account = new Account("John Doe", "password123", "johndoe", "1990-01-01", "johndoe@example.com");
         Account account1 = new Account("poing", "password123", "cpoing", "12-1-2022", "poingkiport");
         allRegisteredAccounts.add(account);
         allRegisteredAccounts.add(account1);
     }
-    Account userAccount;
-    private Socket clientSocket;
-    private BufferedWriter out;
-    private BufferedReader in;
+
+    
     public  ClientHandler(Socket socket){
         this.clientSocket = socket;
         try {
@@ -45,6 +48,8 @@ class ClientHandler implements Runnable{
         System.out.println(".....");
         sendUser();
     }
+
+
     private boolean isValidUser(String username,String password){
         for (Account account : allRegisteredAccounts) {
             if(account.getUsername().equals(username) && account.password.equals(password)) {
@@ -55,6 +60,8 @@ class ClientHandler implements Runnable{
         }
         return false;
     }
+
+
     private void sendUser() throws IOException{
         String jsonAccount = gson.toJson(userAccount);
         System.out.println(" Sending User To client");
@@ -62,6 +69,8 @@ class ClientHandler implements Runnable{
         out.newLine();
         out.flush();
     }
+
+
     @Override
     public void run(){
         try {
@@ -82,6 +91,8 @@ class ClientHandler implements Runnable{
             }
         }
     }
+
+    
     private void sendMessage(Message message) {
         try {
             for (ClientHandler clientHandler : allClients) {

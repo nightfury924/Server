@@ -9,7 +9,6 @@ public class Client {
     private BufferedWriter out;
     private Account userAccount;
     private static Gson  gson = new Gson();
-    // private String username;
     private static final String SERVER_IP = "localhost";
     private static final int SERVER_PORT = 27508;
 
@@ -23,15 +22,26 @@ public class Client {
             e.printStackTrace();
         }
     }
-    public void startListening(){
+
+    private void printMessages(){
+        for (DirectChat dc : userAccount.direct_chats) {
+            for (Message text : dc.messages) {
+                System.out.println(text.text);
+            }
+        }
+        
+    }
+
+    private void startListening(){
         new Thread(new Runnable() {
             @Override
             public void run(){
-                String msgIncoming;
+                Message msgIncoming;
                 while(socket.isConnected()){
                     try {
-                        msgIncoming = in.readLine();
-                        System.out.println(msgIncoming);
+                        msgIncoming = gson.fromJson(in.readLine(), Message.class);
+                        System.out.println(msgIncoming.sender + " : "+ msgIncoming.text);
+                        addMessage(msgIncoming);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -39,7 +49,12 @@ public class Client {
             }
         }).start();
     }
-    public void  sendMessage(){
+
+    private void addMessage(Message incMsg){
+        
+    }
+
+    private void  sendMessage(){
         try{
             // Scanner scanner = new Scanner(System.in);
             while(socket.isConnected()){
@@ -60,7 +75,10 @@ public class Client {
             System.err.println("Error sending message: " + e.getMessage());
         }
     }
-    public boolean authorization() throws IOException{
+
+
+    //authorization has problems if rejected program just hangs
+    private boolean authorization() throws IOException{
         for (int i = 1; i <= 3; i++) {
             System.out.println(" Enter UserName: ");
             String temp_userName = Client.sc.nextLine();
@@ -83,21 +101,25 @@ public class Client {
         socket.close();
         return false;
     }
-    public void receiveAccount( )throws IOException{
+
+
+
+    private void receiveAccount( )throws IOException{
         String jsonAccount = in.readLine();
         userAccount = gson.fromJson(jsonAccount, Account.class);
         userAccount.tempMsg = new Message();
         System.out.println("User Name :"+userAccount.getUsername());
     }
+
+
+
     static Scanner sc = new Scanner(System.in);
     public static void main(String[] args) throws UnknownHostException, IOException {
         // String username = sc.nextLine();
         Socket socKet=new Socket(SERVER_IP, SERVER_PORT);;
         Client client = new Client(socKet);
         boolean Authenticated = client.authorization();
-        // while(Authenticated == false) {
-        //     Authenticated = client.authorization();
-        // }
+        
         if(!Authenticated){
             System.exit(SERVER_PORT);
         }
@@ -107,12 +129,5 @@ public class Client {
         sc.close();
         
     }
-    public void printMessages(){
-        for (DirectChat dc : userAccount.direct_chats) {
-            for (Message text : dc.messages) {
-                System.out.println(text.text);
-            }
-        }
-        
-    }
+    
 }
