@@ -86,6 +86,7 @@ public class Client {
     public void receiveAccount( )throws IOException{
         String jsonAccount = in.readLine();
         userAccount = gson.fromJson(jsonAccount, Account.class);
+        userAccount.tempMsg = new Message();
         System.out.println("User Name :"+userAccount.getUsername());
     }
     static Scanner sc = new Scanner(System.in);
@@ -100,9 +101,18 @@ public class Client {
         if(!Authenticated){
             System.exit(SERVER_PORT);
         }
+        client.printMessages();
         client.startListening();
         client.sendMessage();
         sc.close();
+        
+    }
+    public void printMessages(){
+        for (DirectChat dc : userAccount.direct_chats) {
+            for (Message text : dc.messages) {
+                System.out.println(text.text);
+            }
+        }
         
     }
 }

@@ -9,7 +9,7 @@ class ClientHandler implements Runnable{
     private static Gson gson = new Gson();
     static {
         Account account = new Account("John Doe", "password123", "johndoe", "1990-01-01", "johndoe@example.com");
-        Account account1 = new Account("cping", "123", "poing", "124541", "adf");
+        Account account1 = new Account("poing", "password123", "cpoing", "12-1-2022", "poingkiport");
         allRegisteredAccounts.add(account);
         allRegisteredAccounts.add(account1);
     }
