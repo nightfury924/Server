@@ -11,8 +11,11 @@ public class Account extends PersonelData {
         this.password=password;
         this.email = email;
     }
-    public void createDirectChat(String recieverUserName,Message msg) {
-        DirectChat dc = new DirectChat(recieverUserName,msg);
+    public void createDirectChat(String p1, String p2,Message msg) {
+        DirectChat dc = new DirectChat(p1,p2,msg);
         direct_chats.add(dc);
+    }
+    public void addGroupChat(GroupChat groupChat){
+        group_chats.add(groupChat);
     }
 }
