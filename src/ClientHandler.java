@@ -57,7 +57,7 @@ class ClientHandler implements Runnable{
     private void signUp() throws Exception{
         boolean valid;
         do {
-            valid = checkUserNameAvailability(in.readLine()); // checks if userName is available
+            valid = checkUserNameAvailability(in.readLine(),0); // checks if userName is available
             if(valid){
                 out.write("ok\n");
                 out.flush();
@@ -85,13 +85,23 @@ class ClientHandler implements Runnable{
         this.userAccount = account;
     }
 
-    private boolean checkUserNameAvailability(String name){
-        for (Account account : allRegisteredAccounts) {
-            if(account.getUsername().equals(name)){
-                return false;
+    private boolean checkUserNameAvailability(String name, int flag){
+        if(flag == 0){
+            for (Account account : allRegisteredAccounts) {
+                if(account.getUsername().equals(name)){
+                    return false;
+                }
             }
+            return true;
         }
-        return true;
+        else{
+            for (Account account : allRegisteredAccounts) {
+                if(account.getUsername().equals(name)){
+                    return true;
+                }
+            }
+            return true;
+        }
     }
 
     private boolean checkEmail(String mail){
@@ -175,12 +185,13 @@ class ClientHandler implements Runnable{
                 }else if(incomingMessage.equals("entering a server")){
                     enteringServer();
                     continue;
-                }else if(incomingMessage.equals("new user sign up")){
-                    // addNewUser();
+                }else if(incomingMessage.equals("start a new direct chat")){
+                    startNewPrivateChat();
                     continue;
                 }else{
+                    Message incMsg = ClientHandler.gson.fromJson(incomingMessage, Message.class);
                     System.out.println("sending Message");
-                    sendMessage(gson.fromJson(incomingMessage, Message.class));
+                    sendMessage(incMsg);
                 }
                 
             }
@@ -192,6 +203,45 @@ class ClientHandler implements Runnable{
                 clientSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    private void startNewPrivateChat() throws IOException{
+        String recepientName = in.readLine();
+        int i = 0;
+        for(ClientHandler ct : allClients){
+            if(ct.userAccount.getUsername().equals(recepientName)){
+                DirectChat dc = new DirectChat(recepientName, this.userAccount.getUsername(), new Message(recepientName,this.userAccount.getUsername(),true,"Start of messages between "+recepientName+" and "+this.userAccount.getUsername()));
+                this.userAccount.direct_chats.add(dc);
+                ct.userAccount.direct_chats.add(dc);
+                ct.out.write("add a new direct chat\n");
+                ct.out.flush();
+                ct.out.write(gson.toJson(dc));
+                ct.out.newLine();
+                ct.out.flush();
+                this.out.write("add a new direct chat\n");
+                this.out.flush();
+                this.out.write(gson.toJson(dc));
+                this.out.newLine();
+                this.out.flush();
+                i++;
+                break;
+            }
+        }
+        if(i == 0){
+            for (Account account : allRegisteredAccounts) {
+                if(account.getUsername().equals(recepientName)){
+                    DirectChat dc = new DirectChat(recepientName, this.userAccount.getUsername(), new Message(recepientName,this.userAccount.getUsername(),true,"Start of messages between "+recepientName+" and "+this.userAccount.getUsername()));
+                    this.userAccount.direct_chats.add(dc);
+                    account.direct_chats.add(dc);
+                    this.out.write("add a new direct chat\n");
+                    this.out.flush();
+                    this.out.write(gson.toJson(dc));
+                    this.out.newLine();
+                    this.out.flush();
+                    break;
+                }
             }
         }
     }
@@ -362,6 +412,7 @@ class ClientHandler implements Runnable{
             if(message.chatType) {
                 System.out.println("Direct Message");
                 addDirectMessageForServer(message, this.userAccount);
+                int i = 0;
                 for (ClientHandler clientHandler : allClients) {
                     if(clientHandler.userAccount.getUsername().equals(message.receiver)){
                         addDirectMessageForServer(message, clientHandler.userAccount);
@@ -369,6 +420,14 @@ class ClientHandler implements Runnable{
                         clientHandler.out.write(gson.toJson(message));
                         clientHandler.out.newLine();
                         clientHandler.out.flush();
+                        i++;
+                    }
+                }
+                if(i==0){
+                    for (Account account : allRegisteredAccounts) {
+                        if(account.getUsername().equals(message.receiver)){
+                            addDirectMessageForServer(message, account);
+                        }
                     }
                 }
             }

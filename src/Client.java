@@ -3,18 +3,13 @@ import java.net.*;
 // import java.util.ArrayList;
 import java.util.Scanner;
 
-// import javax.swing.GrayFilter;
-// import javax.swing.GroupLayout.Group;
-
-// import org.w3c.dom.UserDataHandler;
-
 import com.google.gson.Gson;
 
 public class Client {
     private Socket socket;
     private BufferedReader in;
     private BufferedWriter out;
-    private static Account userAccount;
+    private Account userAccount;
     private static Gson  gson = new Gson();
     private static final String SERVER_IP = "localhost";
     private static final int SERVER_PORT = 27508;
@@ -33,9 +28,11 @@ public class Client {
 
     private void printMessages(){        // do this
         for (DirectChat dc : userAccount.direct_chats) {
-            System.out.println("-----------------------------");
+            System.out.println("-----------------------------------------------------------");
+            System.out.println("Participent 1: " + dc.participants[0] + "\tParticipent 2: " + dc.participants[1]);
+            System.out.println("-----------------------------------------------------------");
             dc.displayChat();
-            System.out.println("-----------------------------");
+            System.out.println("-----------------------------------------------------------");
         }
     }
 
@@ -51,12 +48,14 @@ public class Client {
                         if(input.equals("update Group Chat")){
                             updateGroupChat(in.readLine());
                             input = "";
-                        }
-                        else if(input.equals("update direct chat")){
+                        }else if(input.equals("update direct chat")){
                             updateDirectChat(in.readLine());
                             input = "";
-                        }
-                        else{
+                        }else if(input.equals("add a new direct chat")){
+                            DirectChat dc = gson.fromJson(in.readLine(), DirectChat.class);
+                            userAccount.direct_chats.add(dc);
+                            input = "";
+                        }else{
                             msgIncoming = gson.fromJson(input, Message.class);
                             System.out.println(msgIncoming.sender + " : "+ msgIncoming.text);
                             addMessage(msgIncoming);
@@ -92,6 +91,8 @@ public class Client {
         }
     }
 
+    
+
     private void interact(){
         // Scanner scanner = new Scanner(System.in);
         while(socket.isConnected()){
@@ -106,19 +107,22 @@ public class Client {
                 choice = Client.sc.nextInt();
                 Client.sc.nextLine();
                 if(choice == 1){
-                    System.out.println(" 1.Send message");
-                    System.out.println(" 2.Delete Message");
-                    System.out.println(" 3.Edit Message");
+                    System.out.println(" 1.Strat a New Direct Chat");
+                    System.out.println(" 2.Send message");
+                    System.out.println(" 3.Delete Message");
+                    System.out.println(" 4.Edit Message");
                     System.out.print(" Choice : ");
                     choice = Client.sc.nextInt();
                     Client.sc.nextLine();
-                    if(choice ==1){
+                    if(choice == 1){
+                        startNewDirectChat();
+                    }else if(choice ==2){
                         sendDirectMessage();
                     }
-                    else if(choice==2){
+                    else if(choice==3){
                         deleteDirectMessage();
                     }
-                    else if(choice == 3){
+                    else if(choice == 4){
                         editMessage();
                     }
                 }
@@ -411,7 +415,17 @@ public class Client {
         }
     }
 
-    private void sendDirectMessage() throws IOException{
+    private void startNewDirectChat() throws IOException{
+        System.out.print("Enter Username of person to send a direct message to : ");
+        String username = Client.sc.nextLine();
+        out.write("start a new direct chat\n");
+        out.flush();
+        out.write(username);
+        out.newLine();
+        out.flush();
+    }
+
+    private void sendDirectMessage() throws IOException, InterruptedException{
         System.out.print(" Enter Recipient  : ");
         String recipient = Client.sc.nextLine();
         System.out.print("Enter your message: ");
@@ -420,8 +434,11 @@ public class Client {
         userAccount.tempMsg.sender = userAccount.getUsername();
         userAccount.tempMsg.receiver = recipient;
         userAccount.tempMsg.chatType = true;
-        addMessage(userAccount.tempMsg);
+        if (!addMessage(userAccount.tempMsg)){
+            return ;
+        }
         String outgoing = gson.toJson(userAccount.tempMsg);
+        userAccount.tempMsg = new Message();
         out.write(outgoing);
         out.newLine();
         out.flush();
@@ -450,18 +467,16 @@ public class Client {
         userAccount.tempMsg.clear();
     }
 
-    private void addMessage(Message incMsg){
+    private boolean addMessage(Message incMsg){
         if(incMsg.chatType){
-            int i = 0;
             for (DirectChat dc : userAccount.direct_chats) {
                 if(dc.participants[0].equals(incMsg.receiver) || dc.participants[1].equals(incMsg.receiver)){
-                    i++;
                     dc.messages.add(incMsg);
+                    return true;
                 }
             }
-            if(i == 0){
-                userAccount.createDirectChat(incMsg.receiver, incMsg.sender, incMsg);
-            }
+            System.out.println(" First start a new Direct chat with this Recipient");
+            return false;
         }
         else{
             for (GroupChat gc : userAccount.group_chats){
@@ -469,6 +484,7 @@ public class Client {
                     gc.messages.add(incMsg);
                 }
             }
+            return true;
         }
     }
 
