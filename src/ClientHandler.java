@@ -4,6 +4,7 @@ import java.util.*;
 
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 class ClientHandler implements Runnable{
     private static ArrayList<ClientHandler> allClients = new ArrayList<>();
@@ -38,7 +39,7 @@ class ClientHandler implements Runnable{
         String password = in.readLine();
         System.out.println(" UserName : "+userName+"    Password: " + password );
         while( !isValidUser(userName,password)){
-            out.write("false");
+            out.write("false\n");
             out.flush();
             userName = in.readLine();
             password = in.readLine();
@@ -53,12 +54,60 @@ class ClientHandler implements Runnable{
         checkAndSendGroupChats();
     }
 
+    private void signUp() throws Exception{
+        boolean valid;
+        do {
+            valid = checkUserNameAvailability(in.readLine()); // checks if userName is available
+            if(valid){
+                out.write("ok\n");
+                out.flush();
+                break;
+            }
+            else{
+                out.write("duplicate\n");
+                out.flush();
+            }
+        } while (true);
+        do {
+            valid = checkEmail(in.readLine()); // checks if userName is available
+            if(valid){
+                out.write("ok\n");
+                out.flush();
+                break;
+            }
+            else{
+                out.write("duplicate\n");
+                out.flush();
+            }
+        } while (true);
+        Account account = gson.fromJson(in.readLine(), Account.class);
+        allRegisteredAccounts.add(account);
+        this.userAccount = account;
+    }
+
+    private boolean checkUserNameAvailability(String name){
+        for (Account account : allRegisteredAccounts) {
+            if(account.getUsername().equals(name)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkEmail(String mail){
+        for (Account account : allRegisteredAccounts) {
+            if(account.email.equals(mail)){
+                return false;
+            }
+        }
+        return true;
+    }
 
     private boolean isValidUser(String username,String password){
         for (Account account : allRegisteredAccounts) {
             if(account.getUsername().equals(username) && account.password.equals(password)) {
+                this.userAccount = account;
                 allClients.add(this);
-                userAccount = account;
                 return true;
             }
         }
@@ -92,31 +141,46 @@ class ClientHandler implements Runnable{
     @Override
     public void run(){
         try {
-            login();
-            String gsonMessage;
+            String logOrSign = in.readLine();
+            if(logOrSign.equals("login")){
+                login();
+            }
+            else if(logOrSign.equals("signUp")){
+                signUp();
+            }
+            String incomingMessage;
             while (clientSocket.isConnected()){
-                gsonMessage = in.readLine();
-                if(gsonMessage.equals("new Group Chat")){
+                incomingMessage = in.readLine();
+                if(incomingMessage.equals("new Group Chat")){
                     addGroupChat();
                     continue;
-                }else if(gsonMessage.equals("Adding an admin")){
+                }else if(incomingMessage.equals("Adding an admin")){
                     makingAdmin();
                     continue;
-                }else if(gsonMessage.equals("leaving Group")){
+                }else if(incomingMessage.equals("leaving Group")){
                     leavingGroup();
                     continue;
-                }else if(gsonMessage.equals("group message deleted")){
+                }else if(incomingMessage.equals("group message deleted")){
                     deleteGroupMessage();
                     continue;
-                }else if(gsonMessage.equals("direct message deleted")){
+                }else if(incomingMessage.equals("direct message deleted")){
                     deleteDirectMessage();
                     continue;
-                }else if(gsonMessage.equals("direct message edited")){
+                }else if(incomingMessage.equals("direct message edited")){
                     editDirectMessage();
+                    continue;
+                }else if(incomingMessage.equals("group message edited")){
+                    editGroupMessage();
+                    continue;
+                }else if(incomingMessage.equals("entering a server")){
+                    enteringServer();
+                    continue;
+                }else if(incomingMessage.equals("new user sign up")){
+                    // addNewUser();
                     continue;
                 }else{
                     System.out.println("sending Message");
-                    sendMessage(gson.fromJson(gsonMessage, Message.class));
+                    sendMessage(gson.fromJson(incomingMessage, Message.class));
                 }
                 
             }
@@ -129,6 +193,26 @@ class ClientHandler implements Runnable{
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void enteringServer() throws Exception{
+        String code = in.readLine();
+        int i = 0;
+        for (GroupChat gp : allGroupChats) {
+            if(gp.joinGroup(code, this.userAccount.getUsername())){
+                this.out.write("group joined successfully\n");
+                this.out.flush();
+                this.out.write(gson.toJson(gp));
+                this.out.newLine();
+                this.out.flush();
+                i++;
+                break;
+            }
+        }
+        if(i == 0){
+            this.out.write("no matching group\n");
+            this.out.flush();
         }
     }
 
@@ -195,22 +279,25 @@ class ClientHandler implements Runnable{
                 break;
             }
         }
-        for (ClientHandler cl : allClients){
-            if(cl.userAccount.getUsername().equals(msgToDelete.receiver)){
-                for (DirectChat dc : cl.userAccount.direct_chats) {
-                    if(dc.participants[0].equals(msgToDelete.sender) || dc.participants[1].equals(msgToDelete.sender)){
-                        dc.messages.remove(msgToDelete);
-                        cl.out.write("update direct chat");
-                        cl.out.newLine();
-                        cl.out.flush();
-                        cl.out.write(gson.toJson(dc));
-                        cl.out.newLine();
-                        cl.out.flush();
-                        break;
+        if(msgToDelete.sender.equals(this.userAccount.getUsername())){
+            for (ClientHandler cl : allClients){
+                if(cl.userAccount.getUsername().equals(msgToDelete.receiver)){
+                    for (DirectChat dc : cl.userAccount.direct_chats) {
+                        if(dc.participants[0].equals(msgToDelete.sender) || dc.participants[1].equals(msgToDelete.sender)){
+                            dc.messages.remove(msgToDelete);
+                            cl.out.write("update direct chat");
+                            cl.out.newLine();
+                            cl.out.flush();
+                            cl.out.write(gson.toJson(dc));
+                            cl.out.newLine();
+                            cl.out.flush();
+                            break;
+                        }
                     }
                 }
             }
         }
+        
     }
 
     private void editDirectMessage() throws Exception{
@@ -220,7 +307,7 @@ class ClientHandler implements Runnable{
             if((dc.participants[0].equals(msgToEdit.receiver) || dc.participants[1].equals(msgToEdit.receiver))){
                 for (Message msg : dc.messages) {
                     if(msg.equals(msgToEdit)){
-                        msg = msgToEdit;
+                        msg.text = newMsg;
                         break;
                     }
                 }
@@ -245,10 +332,29 @@ class ClientHandler implements Runnable{
                         cl.out.flush();
                         break;
                     }
+                    break;
                 }
             }
-            break;
         }
+    }
+
+    private void editGroupMessage() throws Exception{
+        String groupName = in.readLine();
+        Message msgToEdit = gson.fromJson(in.readLine(), Message.class);
+        String newMsg = in.readLine();
+        for (GroupChat gp : allGroupChats) {
+            if(gp.groupName.equals(groupName)){
+                for (Message msg : gp.messages) {
+                    if(msg.equals(msgToEdit)) {
+                        msg.text = newMsg;
+                        broadCastUpdatedGroup(gp);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        
     }
     
     private void sendMessage(Message message) {
@@ -300,4 +406,6 @@ class ClientHandler implements Runnable{
             accountToAddMessage.createDirectChat(message.receiver, message.sender, message);
         }
     }
+
+
 }

@@ -49,12 +49,15 @@ public class GroupChat {
         }
     }
 
-    public void joinGroup(String code,String username){
+    public boolean joinGroup(String code,String username){
         if(code.equals(entranceCode)){
             members.add(username);
+            return true;
         }
         else{
-            System.out.println( "Failed to Join the chat room. Ask  admin for the correct Entrance Code.");
+            System.out.println( "Entrance code didn't match");
+            return false;
         }
     }
+
 }
