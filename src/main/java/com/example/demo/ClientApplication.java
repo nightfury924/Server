@@ -21,6 +21,7 @@ public class ClientApplication extends Application {
         try {
             Socket socKet=new Socket(Client.SERVER_IP, Client.SERVER_PORT);;
             Client client = new Client(socKet);
+//           client.startListening();
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/demo/Start.fxml"));
             Parent root = loader.load();

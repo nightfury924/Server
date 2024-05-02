@@ -184,6 +184,7 @@ public class LoginController implements Initializable {
             client.out.flush();
             String response = client.in.readLine();
             if(response.equals("true")){
+                client.startListening();
                 client.receiveAccount();
 
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/demo/MainPage.fxml"));

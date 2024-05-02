@@ -11,16 +11,16 @@ public class Server {
         this.serverSocket = serverSocket;
     }
     public void startServer(){
-        try {
-            while (!serverSocket.isClosed()){
+        while (!serverSocket.isClosed()){
+            try {
                 Socket socket = serverSocket.accept();
                 System.out.println(" Client Connected");
                 ClientHandler clientHandler = new ClientHandler(socket);
                 Thread thread = new Thread(clientHandler);
                 thread.start();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
     public static void main(String[] args) throws IOException{

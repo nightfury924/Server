@@ -72,8 +72,13 @@ class ClientHandler implements Runnable{
 
         dc2.messages.add(m8);
         dc2.messages.add(m9);
+
+//        Account account = new Account("John Doe", "password123", "johndoe123", "1990-01-01", "johndoe123@example.com");
+//        Account account2 = new Account("ABC 123", "password123", "abced123", "1990-01-01", "abc123@example.com");
+//        Account account1 = new Account("poing", "password123", "cpoing123", "12-1-2022", "poingkiport@gmail.com");
+
         account.direct_chats.add(dc1);
-        account2.direct_chats.add(dc1);
+        account1.direct_chats.add(dc1);
         account2.direct_chats.add(dc2);
         account1.direct_chats.add(dc2);
         allRegisteredAccounts.add(account);
@@ -535,6 +540,7 @@ class ClientHandler implements Runnable{
             if( (dc.participants[0].equals(message.receiver) && dc.participants[1].equals(message.sender) || (dc.participants[1].equals(message.receiver) && dc.participants[0].equals(message.sender) ))){
                 i++;
                 dc.messages.add(message);
+                break;
             }
         }
 //        if(i == 0){
