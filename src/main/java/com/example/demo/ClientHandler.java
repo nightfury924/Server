@@ -73,9 +73,6 @@ class ClientHandler implements Runnable{
         dc2.messages.add(m8);
         dc2.messages.add(m9);
 
-//        Account account = new Account("John Doe", "password123", "johndoe123", "1990-01-01", "johndoe123@example.com");
-//        Account account2 = new Account("ABC 123", "password123", "abced123", "1990-01-01", "abc123@example.com");
-//        Account account1 = new Account("poing", "password123", "cpoing123", "12-1-2022", "poingkiport@gmail.com");
 
         account.direct_chats.add(dc1);
         account1.direct_chats.add(dc1);
@@ -244,31 +241,22 @@ class ClientHandler implements Runnable{
                 incomingMessage = in.readLine();
                 if(incomingMessage.equals("new Group Chat")){
                     addGroupChat();
-                    continue;
                 }else if(incomingMessage.equals("Adding an admin")){
                     makingAdmin();
-                    continue;
                 }else if(incomingMessage.equals("leaving Group")){
                     leavingGroup();
-                    continue;
                 }else if(incomingMessage.equals("group message deleted")){
                     deleteGroupMessage();
-                    continue;
                 }else if(incomingMessage.equals("direct message deleted")){
                     deleteDirectMessage();
-                    continue;
                 }else if(incomingMessage.equals("direct message edited")){
                     editDirectMessage();
-                    continue;
                 }else if(incomingMessage.equals("group message edited")){
                     editGroupMessage();
-                    continue;
                 }else if(incomingMessage.equals("entering a server")){
                     enteringServer();
-                    continue;
                 }else if(incomingMessage.equals("start a new direct chat")){
                     startNewPrivateChat();
-                    continue;
                 }else{
                     Message incMsg = ClientHandler.gson.fromJson(incomingMessage, Message.class);
                     System.out.println("sending Message");
