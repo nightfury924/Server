@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="712.0" prefWidth="1194.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" >
+   <children>
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#70bef5" height="712.0" stroke="WHITE" strokeType="INSIDE" width="653.0" />
+      <Label layoutX="880.0" layoutY="124.0" text="Sign Up" textFill="#70bef5">
+         <font>
+            <Font name="Ebrima" size="40.0" />
+         </font>
+      </Label>
+      <Button layoutX="908.0" layoutY="525.0" mnemonicParsing="false" onAction="#signup" prefHeight="44.0" prefWidth="83.0" style="-fx-background-color: #70bef5;" text="Sign Up" textAlignment="CENTER" textFill="WHITE">
+         <font>
+            <Font name="Ebrima Bold" size="15.0" />
+         </font>
+      </Button>
+      <Label layoutX="866.0" layoutY="587.0" text="Already have an account?">
+         <font>
+            <Font name="Dubai Regular" size="13.0" />
+         </font>
+      </Label>
+      <Button layoutX="996.0" layoutY="583.0" mnemonicParsing="false" onAction="#switchToLogin" pickOnBounds="false" style="-fx-background-color: transparent;" text="Login" textFill="#002bff" underline="true">
+         <font>
+            <Font name="Dubai Regular" size="13.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </Button>
+      <TextField fx:id="signupUsernameField" layoutX="805.0" layoutY="238.0" prefHeight="33.0" prefWidth="181.0" promptText="Username" style="-fx-background-color: transparent; -fx-border-color: #70bef5; -fx-border-width: 0px 0px 2px 0px;">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </TextField>
+      <PasswordField fx:id="signupPasswordField" layoutX="805.0" layoutY="376.0" prefHeight="33.0" prefWidth="181.0" promptText="Password" style="-fx-background-color: transparent; -fx-border-color: #70bef5; -fx-border-width: 0px 0px 2px 0px;">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </PasswordField>
+      <PasswordField fx:id="signupConfirmPasswordField" layoutX="805.0" layoutY="445.0" prefHeight="33.0" prefWidth="181.0" promptText="Confirm Password" style="-fx-background-color: transparent; -fx-border-color: #70bef5; -fx-border-width: 0px 0px 2px 0px;">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </PasswordField>
+      <TextField fx:id="signupEmailField" layoutX="805.0" layoutY="307.0" prefHeight="33.0" prefWidth="181.0" promptText="Email" style="-fx-background-color: transparent; -fx-border-color: #70bef5; -fx-border-width: 0px 0px 2px 0px;">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </TextField>
+      <Label fx:id="signupUsernameError" layoutX="805.0" layoutY="271.0" text="Username must be 8 characters or more" textFill="#dd0000" visible="false" />
+      <Label fx:id="signupEmailError" layoutX="805.0" layoutY="340.0" text="Email must contain '@' and '.'" textFill="#dd0000" visible="false" />
+      <Label fx:id="signupPasswordError" layoutX="805.0" layoutY="409.0" text="Password must be 8 characters or more" textFill="#dd0000" visible="false" />
+      <Label fx:id="signupConfirmPasswordError" layoutX="805.0" layoutY="478.0" text="Passwords do not match" textFill="#dd0000" visible="false" />
+      <Label fx:id="signupFailError" layoutX="773.0" layoutY="616.0" prefHeight="25.0" prefWidth="354.0" text="The username or email you have entered is already taken" textFill="#dd0000" visible="false" >
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

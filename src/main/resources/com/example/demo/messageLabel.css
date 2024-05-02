@@ -1,0 +1,17 @@
+.message-label {
+    -fx-background-color: #70bef5; /* Light blue for sent messages */
+    -fx-background-radius: 10px;
+    -fx-padding: 8px 12px; /* Adjust padding as needed */
+    -fx-max-width: 70%; /* Maximum width to wrap text */
+    -fx-wrap-text: true; /* Wrap text if it exceeds width */
+    -fx-font-size: 14px;
+}
+
+.received-message-label {
+    -fx-background-color: #ffffff; /* White for received messages */
+    -fx-background-radius: 10px;
+    -fx-padding: 8px 12px; /* Adjust padding as needed */
+    -fx-max-width: 70%; /* Maximum width to wrap text */
+    -fx-wrap-text: true; /* Wrap text if it exceeds width */
+    -fx-font-size: 14px;
+}
