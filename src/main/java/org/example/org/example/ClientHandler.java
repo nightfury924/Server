@@ -106,12 +106,10 @@ public class ClientHandler implements Runnable{
         String userName = in.readLine();
         String password = in.readLine();
         System.out.println(" UserName : "+userName+"    Password: " + password );
-        while( !isValidUser(userName,password)){
+        if(!isValidUser(userName,password)){
             out.write("false\n");
             out.flush();
-            userName = in.readLine();
-            password = in.readLine();
-            System.out.println(" UserName : "+userName+"    Password: " + password );
+            return ;
         }
         out.write("true");
         out.newLine();
