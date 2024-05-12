@@ -263,7 +263,12 @@ public class ClientHandler implements Runnable{
                     enteringServer();
                 }else if(incomingMessage.equals("start a new direct chat")){
                     startNewPrivateChat();
-                }else{
+                }else if(incomingMessage.equals("check validity for new direct chat")){
+                    isValidForDirectChat(in.readLine());
+                }else if(incomingMessage.equals("validate group name for group creation")){
+                    isValidForGroupCreation(in.readLine());
+                }
+                else{
                     Message incMsg = ClientHandler.gson.fromJson(incomingMessage, Message.class);
                     System.out.println("sending Message");
                     sendMessage(incMsg);
@@ -351,6 +356,39 @@ public class ClientHandler implements Runnable{
         Server.storeGroupChatName(tmpGp.groupName);
         System.out.println(" New Group Chat Created.");
     }
+
+    private void isValidForDirectChat(String receiver) throws IOException {
+        for (Account account : allRegisteredAccounts) {
+            if(account.getUsername().equals(receiver)) {
+                for (DirectChat dc: account.direct_chats) {
+                    if( (dc.participants[0].equals(this.userAccount.getUsername() )) ||  dc.participants[1].equals(this.userAccount.getUsername())){
+                        out.write("false\n");
+                        out.flush();
+                        return;
+                    }
+                }
+                out.write("true\n");
+                out.flush();
+                return;
+            }
+        }
+        out.write("false\n");
+        out.flush();
+    }
+
+
+    private void isValidForGroupCreation(String name) throws IOException {
+        for (GroupChat gp : allGroupChats) {
+            if(gp.groupName.equals(name)) {
+                out.write("false\n");
+                out.flush();
+                return;
+            }
+        }
+        out.write("true\n");
+        out.flush();
+    }
+
 
     private void makingAdmin() throws Exception{
         String groupChatName = in.readLine();
