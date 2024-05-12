@@ -3,9 +3,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -56,45 +53,24 @@
             </Button>
          </children>
       </VBox>
-      <HBox prefHeight="100.0" prefWidth="200.0" style="-fx-background-color: #ffffff;">
+      <HBox fx:id="searchHBox" prefHeight="109.0" prefWidth="300.0" style="-fx-background-color: #ffffff;">
          <StackPane.margin>
             <Insets bottom="612.0" left="194.0" right="700.0" />
          </StackPane.margin>
-         <children>
-            <ImageView fitHeight="49.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@search.png" />
-               </image>
-               <HBox.margin>
-                  <Insets left="10.0" top="40.0" />
-               </HBox.margin>
-            </ImageView>
-            <TextField fx:id="searchTextField" prefHeight="36.0" prefWidth="202.0" promptText="Search for chats ..." style="-fx-background-color: transparent; -fx-border-width: 0px 0px 2px 0px; -fx-border-color: #70bef5;">
-               <HBox.margin>
-                  <Insets left="5.0" top="40.0" />
-               </HBox.margin>
-               <font>
-                  <Font name="Ebrima" size="13.0" />
-               </font>
-            </TextField>
-            <ImageView fx:id="searchArrow" fitHeight="32.0" fitWidth="93.0" onMouseClicked="#search" pickOnBounds="true" preserveRatio="true" style="-fx-cursor: HAND;">
-               <image>
-                  <Image url="@searchArrow.png" />
-               </image>
-               <HBox.margin>
-                  <Insets left="10.0" top="40.0" />
-               </HBox.margin>
-            </ImageView>
-         </children>
       </HBox>
       <HBox fx:id="topHBox" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="15.0" style="-fx-background-color: #ededed; -fx-padding: 0 0 0 10;">
          <StackPane.margin>
-            <Insets bottom="600.0" left="494.0" />
+            <Insets bottom="600.0" left="494.0" right="150.0" />
          </StackPane.margin>
       </HBox>
       <HBox fx:id="messageHBox" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" style="-fx-padding: 0 0 0 20;">
          <StackPane.margin>
             <Insets left="494.0" top="632.0" />
+         </StackPane.margin>
+      </HBox>
+      <HBox fx:id="iconHBox" alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0" style="-fx-background-color: #ededed; -fx-padding: 0 0 0 10;">
+         <StackPane.margin>
+            <Insets bottom="600.0" left="1044.0" />
          </StackPane.margin>
       </HBox>
    </children>

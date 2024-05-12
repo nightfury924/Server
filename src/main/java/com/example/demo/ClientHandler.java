@@ -8,16 +8,17 @@ import java.util.*;
 import com.google.gson.Gson;
 // import com.google.gson.JsonSyntaxException;
 
-class ClientHandler implements Runnable{
-    private static ArrayList<ClientHandler> allClients = new ArrayList<>();
-    private static ArrayList<Account> allRegisteredAccounts = new ArrayList<>();
-    private static ArrayList<GroupChat> allGroupChats = new ArrayList<>();
-//    private static ArrayList<DirectChat> allDirectChats = new ArrayList<>();
-    private static Gson gson = new Gson();
+public class ClientHandler implements Runnable{
+    static private final ArrayList<ClientHandler> allClients = new ArrayList<>();
+    static ArrayList<Account> allRegisteredAccounts = new ArrayList<>();
+    static ArrayList<GroupChat> allGroupChats = new ArrayList<>();
+    //    private static ArrayList<DirectChat> allDirectChats = new ArrayList<>();
+    private static final Gson gson = new Gson();
     Account userAccount;
-    private Socket clientSocket;
+    private final Socket clientSocket;
     private BufferedWriter out;
     private BufferedReader in;
+    int changeCount;
 
     static {
         Account account = new Account("John Doe", "password123", "johndoe123", "1990-01-01", "johndoe123@example.com");
@@ -25,14 +26,14 @@ class ClientHandler implements Runnable{
         Account account1 = new Account("poing", "password123", "cpoing123", "12-1-2022", "poingkiport@gmail.com");
 
 
-        GroupChat gc1 = new GroupChat("ping pong", "123abc45");
-        GroupChat gc2 = new GroupChat("ping pong31", "12346abc");
-        GroupChat gc3 = new GroupChat("ping123 pong", "123ab4646c");
-        GroupChat gc4 = new GroupChat("ping 43pong", "123a45bc");
+        GroupChat gc1 = new GroupChat("ping pong");
+        GroupChat gc2 = new GroupChat("ping pong31");
+        GroupChat gc3 = new GroupChat("ping123 pong");
+        GroupChat gc4 = new GroupChat("ping 43pong");
 
-        gc3.joinGroup("123ab4646c", "cpoing123");
-        gc3.joinGroup("123ab4646c", "johndoe123");
-        gc3.joinGroup("123ab4646c", "abced123");
+        gc3.joinGroup("cpoing123");
+        gc3.joinGroup("johndoe123");
+        gc3.joinGroup("abced123");
 
         Message gcm1 = new Message("ping123 pong", "cpoing123", false, "hi");
         Message gcm2 = new Message("ping123 pong", "johndoe123", false, "hello");
@@ -211,19 +212,6 @@ class ClientHandler implements Runnable{
         out.flush();
     }
 
-//    private void checkAndSendDirectChats() throws IOException{
-//        for (DirectChat dc : allDirectChats) {
-//            if(dc.participants[0].equals(this.userAccount.getUsername()) || dc.participants[1].equals(this.userAccount.getUsername())){
-//                out.write(gson.toJson(dc));
-//                out.newLine();
-//                out.flush();
-//            }
-//        }
-//        System.out.println("finished sending directchats");
-//        out.write("Finished Sending directChats");
-//        out.newLine();
-//        out.flush();
-//    }
 
 
     @Override
@@ -257,7 +245,11 @@ class ClientHandler implements Runnable{
                     enteringServer();
                 }else if(incomingMessage.equals("start a new direct chat")){
                     startNewPrivateChat();
-                }else{
+                }else if(incomingMessage.equals("check validity for new direct chat")){
+                    isValidForDirectChat(in.readLine());
+                }else if(incomingMessage.equals("validate group name for group creation")){
+                    isValidForGroupCreation(in.readLine());
+                } else{
                     Message incMsg = ClientHandler.gson.fromJson(incomingMessage, Message.class);
                     System.out.println("sending Message");
                     sendMessage(incMsg);
@@ -276,19 +268,59 @@ class ClientHandler implements Runnable{
         }
     }
 
+    private void isValidForDirectChat(String receiver) throws IOException {
+        for (Account account : allRegisteredAccounts) {
+            if(account.getUsername().equals(receiver)) {
+                for (DirectChat dc: account.direct_chats) {
+                    if( (dc.participants[0].equals(this.userAccount.getUsername() )) ||  dc.participants[1].equals(this.userAccount.getUsername())){
+                        out.write("validate group name for group creation\n");
+                        out.flush();
+                        out.write("false\n");
+                        out.flush();
+                        return;
+                    }
+                }
+                out.write("validate group name for group creation\n");
+                out.flush();
+                out.write("true\n");
+                out.flush();
+                return;
+            }
+        }
+        out.write("validate group name for group creation\n");
+        out.flush();
+        out.write("false\n");
+        out.flush();
+    }
+
+
+    private void isValidForGroupCreation(String name) throws IOException {
+        for (GroupChat gp : allGroupChats) {
+            if(gp.groupName.equals(name)) {
+                out.write("false\n");
+                out.flush();
+                return;
+            }
+        }
+        out.write("true\n");
+        out.flush();
+    }
+
     private void startNewPrivateChat() throws IOException{
-        String recepientName = in.readLine();
+        String receiver = in.readLine();
+        String sender = this.userAccount.getUsername();
+        DirectChat dc  = new DirectChat(sender,receiver,new Message(sender,receiver,true,"Start of Communication Between "+sender+" + "+receiver+"."));
+        DirectChat dc1 = new DirectChat(sender,receiver,new Message(sender,receiver,true,"Start of Communication Between "+sender+" + "+receiver+"."));
         int i = 0;
-        for(ClientHandler ct : allClients){
-            if(ct.userAccount.getUsername().equals(recepientName)){
-                DirectChat dc = new DirectChat(recepientName, this.userAccount.getUsername(), new Message(recepientName,this.userAccount.getUsername(),true,"Start of messages between "+recepientName+" and "+this.userAccount.getUsername()));
+        for(ClientHandler cl : allClients){
+            if(cl.userAccount.getUsername().equals(receiver)){
                 this.userAccount.direct_chats.add(dc);
-                ct.userAccount.direct_chats.add(dc);
-                ct.out.write("add a new direct chat\n");
-                ct.out.flush();
-                ct.out.write(gson.toJson(dc));
-                ct.out.newLine();
-                ct.out.flush();
+                cl.userAccount.direct_chats.add(dc1);
+                cl.out.write("add a new direct chat\n");
+                cl.out.flush();
+                cl.out.write(gson.toJson(dc1));
+                cl.out.newLine();
+                cl.out.flush();
                 this.out.write("add a new direct chat\n");
                 this.out.flush();
                 this.out.write(gson.toJson(dc));
@@ -300,10 +332,9 @@ class ClientHandler implements Runnable{
         }
         if(i == 0){
             for (Account account : allRegisteredAccounts) {
-                if(account.getUsername().equals(recepientName)){
-                    DirectChat dc = new DirectChat(recepientName, this.userAccount.getUsername(), new Message(recepientName,this.userAccount.getUsername(),true,"Start of messages between "+recepientName+" and "+this.userAccount.getUsername()));
+                if(account.getUsername().equals(receiver)){
                     this.userAccount.direct_chats.add(dc);
-                    account.direct_chats.add(dc);
+                    account.direct_chats.add(dc1);
                     this.out.write("add a new direct chat\n");
                     this.out.flush();
                     this.out.write(gson.toJson(dc));
@@ -319,7 +350,7 @@ class ClientHandler implements Runnable{
         String code = in.readLine();
         int i = 0;
         for (GroupChat gp : allGroupChats) {
-            if(gp.joinGroup(code, this.userAccount.getUsername())){
+            if(gp.joinGroup(this.userAccount.getUsername())){
                 this.out.write("group joined successfully\n");
                 this.out.flush();
                 this.out.write(gson.toJson(gp));
@@ -338,6 +369,7 @@ class ClientHandler implements Runnable{
     private void addGroupChat() throws Exception{
         GroupChat tmpGp = gson.fromJson(in.readLine(), GroupChat.class);
         allGroupChats.add(tmpGp);
+        Server.storeGroupChatName(tmpGp.groupName);
         System.out.println(" New Group Chat Created.");
     }
 
@@ -523,17 +555,12 @@ class ClientHandler implements Runnable{
     }
 
     private void addDirectMessageForServer(Message message, Account accountToAddMessage){
-        int i = 0;
         for (DirectChat dc : accountToAddMessage.direct_chats) {
             if( (dc.participants[0].equals(message.receiver) && dc.participants[1].equals(message.sender) || (dc.participants[1].equals(message.receiver) && dc.participants[0].equals(message.sender) ))){
-                i++;
                 dc.messages.add(message);
                 break;
             }
         }
-//        if(i == 0){
-//            accountToAddMessage.createDirectChat(message.receiver, message.sender, message);
-//        }
     }
 
 

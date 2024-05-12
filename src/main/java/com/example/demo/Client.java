@@ -17,6 +17,8 @@ public class Client{
     public static final String SERVER_IP = "localhost";
     public static final int SERVER_PORT = 27508;
     static Scanner sc = new Scanner(System.in);
+    static int vGroupNameVar = 0;
+    static public int vboxMessageUpdate = 0;
 
     public Client(Socket socket) {
         try {
@@ -25,19 +27,11 @@ public class Client{
             this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
             this.out = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream()));
         } catch (Exception e) {
+            System.out.println("a");
             e.printStackTrace();
         }
     }
 
-    public void printMessages(){        // do this
-        for (DirectChat dc : userAccount.direct_chats) {
-            System.out.println("-----------------------------------------------------------");
-            System.out.println("Participent 1: " + dc.participants[0] + "\tParticipent 2: " + dc.participants[1]);
-            System.out.println("-----------------------------------------------------------");
-            dc.displayChat();
-            System.out.println("-----------------------------------------------------------");
-        }
-    }
 
     public void startListening(){
         new Thread(new Runnable() {
@@ -58,14 +52,21 @@ public class Client{
                             DirectChat dc = gson.fromJson(in.readLine(), DirectChat.class);
                             userAccount.direct_chats.add(dc);
                             input = "";
-                        }else{
+                        }else if(input.equals("validate group name for group creation")){
+                            input = in.readLine();
+                            if(input.equals("true")) {
+                                Client.vGroupNameVar = 1;
+                            }else{
+                                Client.vGroupNameVar = 2;
+                            }
+                        }
+                        else{
                             msgIncoming = gson.fromJson(input, Message.class);
                             System.out.println(msgIncoming.sender + " : "+ msgIncoming.text);
                             addMessage(msgIncoming);
                         }
 
                     } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
             }
@@ -76,7 +77,7 @@ public class Client{
         GroupChat  updateGc = gson.fromJson(input,GroupChat.class);
         for (GroupChat group : userAccount.group_chats) {
             if(updateGc.groupName.equals(group.groupName)){
-                group = updateGc;
+                userAccount.group_chats.set(userAccount.group_chats.indexOf(group), updateGc);
                 break;
             }
         }
@@ -86,146 +87,13 @@ public class Client{
         DirectChat updateDc = gson.fromJson(input, DirectChat.class);
         for (DirectChat dc : userAccount.direct_chats) {
             if(dc.participants[0].equals(updateDc.participants[0]) && dc.participants[1].equals(updateDc.participants[1])){
-                updateDc.displayChat();
-                dc = updateDc;
-                dc.displayChat();
+                userAccount.direct_chats.set(userAccount.direct_chats.indexOf(dc),updateDc);
+                if(vboxMessageUpdate == 0){
+                    vboxMessageUpdate = 1;
+                }else{
+                    vboxMessageUpdate = 0;
+                }
                 break;
-            }
-        }
-    }
-
-
-
-    public void interact(){
-        // Scanner scanner = new Scanner(System.in);
-        while(socket.isConnected()){
-            try {
-                int choice;
-                System.out.println(" 1.Direct Chat");
-                System.out.println(" 2.Group Chat");
-                System.out.println(" 3.Manage group");
-                System.out.println(" 4.Create Group");
-                System.out.println(" 5.Disply DIrect Chat");
-                System.out.print(" Choice: ");
-                choice = Client.sc.nextInt();
-                Client.sc.nextLine();
-                if(choice == 1){
-                    System.out.println(" 1.Strat a New Direct Chat");
-                    System.out.println(" 2.Send message");
-                    System.out.println(" 3.Delete Message");
-                    System.out.println(" 4.Edit Message");
-                    System.out.print(" Choice : ");
-                    choice = Client.sc.nextInt();
-                    Client.sc.nextLine();
-                    if(choice == 1){
-                        startNewDirectChat();
-                    }else if(choice ==2){
-                        //sendDirectMessage();
-                    }
-                    else if(choice==3){
-                        deleteDirectMessage();
-                    }
-                    else if(choice == 4){
-                        editMessage();
-                    }
-                }
-                else if(choice == 2){
-                    System.out.println(" 1.Send message");
-                    System.out.println(" 2.Join Group");
-                    System.out.print(" Choice : ");
-                    choice = Client.sc.nextInt();
-                    Client.sc.nextLine();
-                    if(choice ==1){
-                        sendGroupMessage();
-                    }
-                    else if(choice==2){
-                        joinGroup();
-                    }
-
-                }
-                else if(choice == 3){
-                    System.out.println(" GroupName: ");
-                    String groupName = Client.sc.nextLine();
-                    for (GroupChat gp : userAccount.group_chats) {
-                        if (gp.groupName.equals(groupName)){
-                            if (gp.isAdmin(userAccount.getUsername())){  // admin options
-                                System.out.println(" 1. Make an Admin");
-                                System.out.println(" 2. Leave Group");
-                                System.out.println(" 3. Kick Member");
-                                System.out.println(" 4. Delete Message"); // can delete any message
-                                System.out.println(" 5. Edit Message");
-                                choice = Client.sc.nextInt();
-                                Client.sc.nextLine();
-                                switch(choice){
-                                    case 1:
-                                        makeAdmin(gp);
-                                        break;
-                                    case 2:
-                                        if(!(gp.noOfAdmins()>1)){
-                                            System.out.println(" You are the only Admin Make Another before Leaving");
-                                            makeAdmin(gp);
-                                        }
-                                        leaveGroup(gp);
-                                        break;
-                                    case 3:
-                                        kickMember(gp);
-                                        break;
-                                    case 4:
-                                        deleteGroupMessage(gp);
-                                        break;
-                                    case 5:
-                                        editGroupMessage(gp);
-                                        break;
-                                }
-                            }
-                            else{
-                                System.out.println(" 1. Leave Group"); // member options
-                                System.out.println(" 2. Delete Message"); // can only delete own message
-                                System.out.println(" 3. Edit Message");
-                                choice = Client.sc.nextInt();
-                                Client.sc.nextLine();
-                                switch(choice){
-                                    case 1:
-                                        leaveGroup(gp);
-                                        break;
-                                    case 2:
-                                        deleteGroupMessage(gp);
-                                        break;
-                                    case 5:
-                                        editGroupMessage(gp);
-                                        break;
-                                }
-                            }
-
-                        }
-                        System.out.println(" 2.Group Chat");
-                        System.out.println(" 3.Manage group");
-                    }
-
-                }else if(choice == 4){
-                    System.out.println(" Enter Group Name: ");
-                    String groupName = Client.sc.nextLine();
-                    System.out.println(" Create Group Entrance Code: ");
-                    String code = Client.sc.nextLine();
-                    GroupChat gp = new GroupChat(groupName, code);
-                    gp.admins.add(userAccount.getUsername());
-                    gp.members.add(userAccount.getUsername());
-                    userAccount.group_chats.add(gp);
-                    out.write("new Group Chat\n");
-                    out.flush();
-                    out.write(gson.toJson(gp));
-                    out.newLine();
-                    out.flush();
-                }
-                else if(choice == 5){
-                    printMessages();
-                }
-                else{
-                    System.out.println("Invalid Choice!");
-                }
-            } catch (Exception e) {
-                System.err.println("Error sending message: " + e.getMessage());
-                Client.sc.nextLine();
             }
         }
     }
@@ -358,49 +226,35 @@ public class Client{
 
     }
 
-    public void editGroupMessage(GroupChat gp) throws Exception{
-        gp.displayChat();
-        System.out.print("\n Select Message to Edit: ");
-        int index = Client.sc.nextInt() - 1;
-        Client.sc.nextLine();
-        Message msg = gp.messages.get(index);
-        if(msg.sender.equals(userAccount.getUsername())){
-            System.out.print(" Enter New Message : ");
-            String newMsg = Client.sc.nextLine();
-            out.write("group message edited");
-            out.newLine();
-            out.flush();
-            out.write(gp.groupName);
-            out.newLine();
-            out.flush();
-            out.write(gson.toJson(msg));
-            out.newLine();
-            out.flush();
-            out.write(newMsg);
-            out.newLine();
-            out.flush();
-            gp.messages.get(index).text = newMsg;
-        }
-        else{
-            System.out.println(" Can only edit own messages.");
+    public void editGroupMessage(String groupName,String message,String newMessage, String sender) throws Exception{
+        for (GroupChat gc : userAccount.group_chats) {
+            if(gc.groupName.equals(groupName)){
+                for (Message msg : gc.messages) {
+                    if(msg.sender.equals(sender)){
+                        out.write("group message edited");
+                        out.newLine();
+                        out.flush();
+                        out.write(gson.toJson(msg));
+                        out.newLine();
+                        out.flush();
+                        out.write(newMessage);
+                        out.newLine();
+                        out.flush();
+                        msg.text = newMessage;
+                        break;
+                    }
+                }
+                break;
+            }
         }
     }
 
-    public void editMessage() throws Exception{
-        System.out.println(" Select the conversation from which you want to delete:");
-        String reciever = Client.sc.nextLine();
+    public void editMessage(String reciever, int index, String newMsg) throws Exception{
         for (DirectChat dc : userAccount.direct_chats) {
             if(dc.participants[0].equals(reciever) || dc.participants[1].equals(reciever)){
-                dc.displayChat();
-                System.out.print("Choose Message to Edit:");
-                int index = Client.sc.nextInt();
-                Client.sc.nextLine();
-                Message msg= dc.messages.get(index-1);
+                Message msg= dc.messages.get(index);
 
                 if(msg.sender.equals(this.userAccount.getUsername())){    // edit from both users chat list
-                    System.out.print(" Enter New Message : ");
-                    String newMsg = Client.sc.nextLine();
-
                     out.write("direct message edited");
                     out.newLine();
                     out.flush();
@@ -410,7 +264,7 @@ public class Client{
                     out.write(newMsg);
                     out.newLine();
                     out.flush();
-                    dc.messages.get(index-1).text = newMsg;
+                    dc.messages.get(index).text = newMsg;
                 }
                 else{
                     System.out.println(" You can only edit your own messages.");
@@ -420,12 +274,23 @@ public class Client{
         }
     }
 
-    public void startNewDirectChat() throws IOException{
-        System.out.print("Enter Username of person to send a direct message to : ");
-        String username = Client.sc.nextLine();
+    public void startNewDirectChat(String username) throws IOException{
         out.write("start a new direct chat\n");
         out.flush();
         out.write(username);
+        out.newLine();
+        out.flush();
+    }
+
+    public void startNewGroupChat(String groupName) throws IOException{
+
+        GroupChat gp = new GroupChat(groupName);
+        gp.admins.add(userAccount.getUsername());
+        gp.members.add(userAccount.getUsername());
+        userAccount.group_chats.add(gp);
+        out.write("new Group Chat\n");
+        out.flush();
+        out.write(gson.toJson(gp));
         out.newLine();
         out.flush();
     }
@@ -446,26 +311,18 @@ public class Client{
         // userAccount.tempMsg.clear();
     }
 
-    public void sendGroupMessage() throws IOException{
-        System.out.print(" Enter Group Name : ");
-        String recipient = Client.sc.nextLine();
-        if(!validateGroupName(recipient)){
-            System.out.println(" Invaid Group Name.");
-            System.out.print(" Enter Group Name : ");
-            recipient = Client.sc.nextLine();
-        }
-        System.out.print("Enter your message: ");
-        String text = Client.sc.nextLine();
+    public void sendGroupMessage(String text, String recipient) throws IOException{
         userAccount.tempMsg.text = text;
         userAccount.tempMsg.sender = userAccount.getUsername();
         userAccount.tempMsg.receiver = recipient;
         userAccount.tempMsg.chatType = false;
         addMessage(userAccount.tempMsg);
         String outgoing = gson.toJson(userAccount.tempMsg);
+        userAccount.tempMsg = new Message();
         out.write(outgoing);
         out.newLine();
         out.flush();
-        userAccount.tempMsg.clear();
+        //userAccount.tempMsg.clear();
     }
 
     public boolean addMessage(Message incMsg){
@@ -490,99 +347,95 @@ public class Client{
         }
     }
 
-    public boolean validateGroupName(String groupName){
-        for (GroupChat gp : userAccount.group_chats) {
-            if (gp.groupName.equals(groupName)){
-                return true;
-            }
-        }
-        return false;
+    public void validateGroupName(String groupName) throws IOException {
+        out.write("validate group name for group creation\n");
+        out.flush();
     }
 
 
     //authorization has problems if rejected program just hangs
-    public boolean login() throws IOException{
-        out.write("login\n");
-        out.flush();
-        for (int i = 1; i <= 3; i++) {
-            System.out.println(" Enter UserName: ");
-            String temp_userName = Client.sc.nextLine();
-            System.out.println(" Password   : ");
-            String temp_password = Client.sc.nextLine();
-            out.write(temp_userName);
-            out.newLine();
-            out.flush();
-            out.write(temp_password);
-            out.newLine();
-            out.flush();
-            String response = in.readLine();
-            if(response.equals("true")){
-                receiveAccount();
-                return true;
-            } else{
-                System.out.println(" Authentication Failed Try AGain. Attempts Remaining "+ (3-i));
-            }
-        }
-        socket.close();
-        return false;
-    }
+//    public boolean login() throws IOException{
+//        out.write("login\n");
+//        out.flush();
+//        for (int i = 1; i <= 3; i++) {
+//            System.out.println(" Enter UserName: ");
+//            String temp_userName = Client.sc.nextLine();
+//            System.out.println(" Password   : ");
+//            String temp_password = Client.sc.nextLine();
+//            out.write(temp_userName);
+//            out.newLine();
+//            out.flush();
+//            out.write(temp_password);
+//            out.newLine();
+//            out.flush();
+//            String response = in.readLine();
+//            if(response.equals("true")){
+//                receiveAccount();
+//                return true;
+//            } else{
+//                System.out.println(" Authentication Failed Try AGain. Attempts Remaining "+ (3-i));
+//            }
+//        }
+//        socket.close();
+//        return false;
+//    }
 
-    public boolean signUp() throws Exception{
-        out.write("signUp\n");
-        out.flush();
-        System.out.print("Enter Name : ");
-        String name = Client.sc.nextLine();
-        String userName;
-        do{
-            System.out.print("Enter UserName : ");
-            userName = Client.sc.nextLine();
-            out.write(userName);
-            out.newLine();
-            out.flush();
-            if(!in.readLine().equals("ok")){
-                System.out.println(" This UserName is Already in Use. Try another.");
-            }
-            else{
-                break;
-            }
-        } while(true);
-        String emailID;
-        do{
-            System.out.print("Enter Email ID : ");
-            emailID = Client.sc.nextLine();
-            out.write(emailID);
-            out.newLine();
-            out.flush();
-            if(!in.readLine().equals("ok")){
-                System.out.println(" This Email Address Already in Use. Try another.");
-            }
-            else{
-                break;
-            }
-        } while(true);
-        String password,confirmPassword;
-        do {
-            System.out.print("Enter Password : ");
-            password = Client.sc.nextLine();
-            System.out.print("Confirm Password : ");
-            confirmPassword = Client.sc.nextLine();
-            if(password.equals(confirmPassword)){
-                break;
-            }
-            else{
-                System.out.println(" Passwords do not match");
-            }
-        } while (true);
-        System.out.println(" Enter Date of Birth (DD-MM-YYYY) : ");
-        String dateOfBirth = Client.sc.nextLine();
-        Account  newAccount = new Account(name,password,userName,dateOfBirth,emailID);
-        out.write(gson.toJson(newAccount));
-        out.newLine();
-        out.flush();
-        userAccount = newAccount;
-        userAccount.tempMsg = new Message();
-        return true;
-    }
+//    public boolean signUp() throws Exception{
+//        out.write("signUp\n");
+//        out.flush();
+//        System.out.print("Enter Name : ");
+//        String name = Client.sc.nextLine();
+//        String userName;
+//        do{
+//            System.out.print("Enter UserName : ");
+//            userName = Client.sc.nextLine();
+//            out.write(userName);
+//            out.newLine();
+//            out.flush();
+//            if(!in.readLine().equals("ok")){
+//                System.out.println(" This UserName is Already in Use. Try another.");
+//            }
+//            else{
+//                break;
+//            }
+//        } while(true);
+//        String emailID;
+//        do{
+//            System.out.print("Enter Email ID : ");
+//            emailID = Client.sc.nextLine();
+//            out.write(emailID);
+//            out.newLine();
+//            out.flush();
+//            if(!in.readLine().equals("ok")){
+//                System.out.println(" This Email Address Already in Use. Try another.");
+//            }
+//            else{
+//                break;
+//            }
+//        } while(true);
+//        String password,confirmPassword;
+//        do {
+//            System.out.print("Enter Password : ");
+//            password = Client.sc.nextLine();
+//            System.out.print("Confirm Password : ");
+//            confirmPassword = Client.sc.nextLine();
+//            if(password.equals(confirmPassword)){
+//                break;
+//            }
+//            else{
+//                System.out.println(" Passwords do not match");
+//            }
+//        } while (true);
+//        System.out.println(" Enter Date of Birth (DD-MM-YYYY) : ");
+//        String dateOfBirth = Client.sc.nextLine();
+//        Account  newAccount = new Account(name,password,userName,dateOfBirth,emailID);
+//        out.write(gson.toJson(newAccount));
+//        out.newLine();
+//        out.flush();
+//        userAccount = newAccount;
+//        userAccount.tempMsg = new Message();
+//        return true;
+//    }
 
 
     public void receiveAccount( )throws IOException{
@@ -591,7 +444,6 @@ public class Client{
         userAccount.tempMsg = new Message();
         System.out.println("User Name :"+userAccount.getUsername());
         receiveGroupChats();
-//        receiveDirectChats();
     }
 
     public void receiveGroupChats() throws IOException{
@@ -603,46 +455,24 @@ public class Client{
         }
     }
 
-//    public void receiveDirectChats() throws IOException{
-//        String incoming = in.readLine();
-//        while (!incoming.equals("Finished Sending directChats")) {
-//            DirectChat tmpDirectChat = gson.fromJson(incoming, DirectChat.class);
-//            userAccount.addDirectChat(tmpDirectChat);
-//            incoming = in.readLine();
-//        }
-//    }
 
-    public static void main(String[] args) throws UnknownHostException, IOException,Exception {
-        // String username = sc.nextLine();
-//        Socket socKet=new Socket(SERVER_IP, SERVER_PORT);;
-//        Client client = new Client(socKet);
-//        System.out.println(" 1.Login");
-//        System.out.println(" 2.SignUP");
-//        System.out.print(" Choose : ");
-//        int ch = sc.nextInt();
-//        sc.nextLine();
-//        boolean authenticated;
-//        if(ch==1){
-//            authenticated = client.login();
-//        }
-//        else if(ch == 2){
-//            authenticated = client.signUp();
-//        }
-//        else{
-//            authenticated = false;
-//        }
-//
-//        if(!authenticated){
-//            System.exit(SERVER_PORT);
-//        }
-//        // client.printMessages();
-//        client.startListening();
-//        client.interact();
-//        sc.close();
+    public boolean isValid(String username) throws IOException{
+        out.write("check validity for new direct chat\n");
+        out.flush();
+        out.write(username);
+        String response = in.readLine();
 
-
-        Application.launch(ClientApplication.class, args);
+        if(response.equals("true")){
+            return true;
+        }
+        else{
+            return false;
+        }
 
     }
+
+//    public static void main(String[] args) throws UnknownHostException, IOException,Exception {
+//        Application.launch(ClientApplication.class, args);
+//    }
 
 }

@@ -1,13 +1,18 @@
 package com.example.demo;
 
-public class PersonelData {
+import java.io.Serializable;
+
+public class PersonelData implements Serializable {
     private String name;
-    final private String username;
+    private String username;
     private String dateOfBirth;
     public PersonelData(String name, String username,String dateOfBirth) {
         this.name = name;
         this.username = username;
         this.dateOfBirth = dateOfBirth;
+    }
+    public PersonelData(){
+
     }
     // public void setUsername(String  username){this.username=username;}
     public void setdateOfBirth(String  dateOfBirth){this.dateOfBirth=dateOfBirth;}
@@ -19,4 +24,3 @@ public class PersonelData {
         return name;
     }
 }
-

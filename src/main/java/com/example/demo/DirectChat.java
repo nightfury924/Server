@@ -1,14 +1,15 @@
 package com.example.demo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class DirectChat {
+public class DirectChat implements Serializable{
     String[] participants = new String[2];
     ArrayList<Message> messages = new ArrayList<>();
-    public DirectChat(String p1, String p2, Message initialMsg){
+    public DirectChat(String p1, String p2, Message initialMessage){
         participants[0] = p1;
         participants[1] = p2;
-        messages.add(initialMsg);
+        messages.add(initialMessage);
     }
     public void displayChat(){
         int i = 1;
@@ -17,9 +18,5 @@ public class DirectChat {
             i++;
         }
     }
-
-//    public void addMessage(String sender, String text){
-//
-//    }
 }
 

@@ -1,22 +1,22 @@
 package com.example.demo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class GroupChat {
+public class GroupChat implements Serializable {
     String groupName;
-    private final String entranceCode;
     ArrayList<String> admins;
     ArrayList<String> members;
     ArrayList<Message> messages;
 
-    public GroupChat(String name, String code) {
+    public GroupChat(String name) {
         groupName = name;
-        entranceCode = code;
         admins = new ArrayList<String>();
         members = new ArrayList<String>();
         messages = new ArrayList<Message>();
     }
-
+    public GroupChat(){
+    }
     public boolean isMember(String name){
         return members.contains(name);
     }
@@ -34,30 +34,21 @@ public class GroupChat {
         members.remove(name);
     }
 
-    public void displayChat(){
-        int i = 1;
-        for (Message message : messages) {
-            System.out.println(" "+i+":"+message.sender+" : "+message.text);
-            i++;
-        }
-    }
+    public boolean joinGroup(String username){
+//        if(name.equals(entranceCode)){
+//            members.add(username);
+//            return true;
+//        }
+//        else{
+//            System.out.println( "Entrance code didn't match");
+//            return false;
+//        }
 
-
-    public void displayMembers(){
-        int i = 1;
-        for (String name : members) {
-            System.out.println(" "+i+" :"+name);
-            i++;
-        }
-    }
-
-    public boolean joinGroup(String code,String username){
-        if(code.equals(entranceCode)){
+        if(!members.contains(username)){
             members.add(username);
             return true;
         }
         else{
-            System.out.println( "Entrance code didn't match");
             return false;
         }
     }

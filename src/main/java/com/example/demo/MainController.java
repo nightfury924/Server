@@ -1,20 +1,24 @@
 package com.example.demo;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.Event;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-// import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-// import javafx.scene.Scene;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
@@ -23,11 +27,18 @@ import javafx.fxml.FXML;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import javafx.scene.Parent;
+import javafx.event.ActionEvent;
+
 
 public class MainController implements Initializable {
     @FXML
@@ -45,8 +56,15 @@ public class MainController implements Initializable {
     @FXML
     private HBox topHBox;
     @FXML
+    private HBox iconHBox;
+    @FXML
     private HBox messageHBox;
     private TextField messageTextField;
+
+    @FXML
+    private HBox searchHBox;
+
+    private HBox targetHBox;
 
     @FXML
     private VBox messageVBox;
@@ -122,6 +140,8 @@ public class MainController implements Initializable {
     }
 
     public void createDirectChats(ArrayList<String> usernames){
+        createDMSearchBox();
+
         for (String username : usernames) {
             Circle userCircle = new Circle(35.0);
             userCircle.setFill(Color.web("#70bef5"));
@@ -161,13 +181,14 @@ public class MainController implements Initializable {
                     }
                 }
                 filltopHBox(name);
-                fillMessageHBox();
+                fillDirectMessageHBox();
                 messageVBox.getChildren().clear();
 
                 //get array of messages that have been sent by usernames[i] to display
                 //also get array of messages that have been sent to usernames[i]
                 DirectChat directChat = null;
                 for(DirectChat dc : client2.userAccount.direct_chats){
+                    directChat = dc;
                     if(dc.participants[0].equals(name) || dc.participants[1].equals(name)){
                         for(Message msg : dc.messages){
                             if(msg.sender.equals(client2.userAccount.getUsername())){
@@ -180,13 +201,25 @@ public class MainController implements Initializable {
                         break;
                     }
                 }
-//                String[] messagesSent = {"Hi", "How are you?", "I am also", "a", "b", "aodjqiojwd iojadiojad jawajdajwidjai ojdioaw jdoiajdio aj asd asd asd ad ad ad a dad ad ad asd ad a as ad ad asd ad ad asd asd ad a a dasd as das dad ad a dad a as as das as as a a as ad as as a a asf sf sfg dfg dfg sf sfsas asd as sdgs fewsfewsfsf sf afewsf eaf as fas", "a", "e", "z", "x", "c"};
-//                String[] messagesReceived = {"Hello", "I am doing fine how about you?", "That's good", "a", "b", "c", "d", "a", "z", "x", "c"};
-//
-//                for(int i=0 ; i<messagesSent.length ; i++){
-//                    addMessageByMe(messagesSent[i]);
-//                    addMessageByServer(messagesReceived[i]);
-//                }
+                ArrayList<Message> oldMessages = new ArrayList<>();
+                oldMessages.addAll(directChat.messages);
+                ArrayList<Message> newMessages = directChat.messages;
+
+                Timer timer = new Timer();
+                timer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run(){
+                        Platform.runLater(() -> {
+                            if (checkLists(oldMessages, newMessages)){
+                                MouseEvent mouseEvent = new MouseEvent(MouseEvent.MOUSE_CLICKED, 0, 0, 0, 0, MouseButton.PRIMARY, 1, true, true, true, true, true, true, true, true, true, true, null);
+                                Event.fireEvent(userHBox, mouseEvent);
+
+                                oldMessages.clear();
+                                oldMessages.addAll(newMessages);
+                            }
+                        });
+                    }
+                }, 0, 1000);
             });
 
             userHBox.setOnMouseEntered(event -> {
@@ -202,6 +235,8 @@ public class MainController implements Initializable {
     }
 
     public void createGroupChats(ArrayList<String> groupNames){
+        createGCSearchBox();
+
         for (String username : groupNames) {
             Circle userCircle = new Circle(35.0);
             userCircle.setFill(Color.web("#70bef5"));
@@ -241,7 +276,7 @@ public class MainController implements Initializable {
                     }
                 }
                 filltopHBox(name);
-                fillMessageHBox();
+                fillGroupMessageHBox();
                 messageVBox.getChildren().clear();
 
                 //get array of messages that have been sent by usernames[i] to display
@@ -249,6 +284,7 @@ public class MainController implements Initializable {
                 GroupChat groupChat = null;
                 for(GroupChat gc : client2.userAccount.group_chats){
                     if(gc.groupName.equals(name)){
+                        groupChat = gc;
                         for(Message msg : gc.messages){
                             if(msg.sender.equals(client2.userAccount.getUsername())){
                                 addMessageByMe(msg.text, client2.userAccount.getUsername());
@@ -260,13 +296,29 @@ public class MainController implements Initializable {
                         break;
                     }
                 }
-//                String[] messagesSent = {"Hi", "How are you?", "I am also", "a", "b", "aodjqiojwd iojadiojad jawajdajwidjai ojdioaw jdoiajdio aj asd asd asd ad ad ad a dad ad ad asd ad a as ad ad asd ad ad asd asd ad a a dasd as das dad ad a dad a as as das as as a a as ad as as a a asf sf sfg dfg dfg sf sfsas asd as sdgs fewsfewsfsf sf afewsf eaf as fas", "a", "e", "z", "x", "c"};
-//                String[] messagesReceived = {"Hello", "I am doing fine how about you?", "That's good", "a", "b", "c", "d", "a", "z", "x", "c"};
-//
-//                for(int i=0 ; i<messagesSent.length ; i++){
-//                    addMessageByMe(messagesSent[i]);
-//                    addMessageByServer(messagesReceived[i]);
+
+//                Message[] oldMessages = new Message[groupChat.messages.size()];
+//                for(int i=0 ; i<groupChat.messages.size() ; i++){
+//                    oldMessages[i] = groupChat.messages.get(i);
 //                }
+                ArrayList<Message> oldMessages = new ArrayList<>(groupChat.messages);
+                ArrayList<Message> newMessages = groupChat.messages;
+
+                Timer timer = new Timer();
+                timer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run(){
+                        Platform.runLater(() -> {
+                            if (checkLists(oldMessages, newMessages)){
+                                MouseEvent mouseEvent = new MouseEvent(MouseEvent.MOUSE_CLICKED, 0, 0, 0, 0, MouseButton.PRIMARY, 1, true, true, true, true, true, true, true, true, true, true, null);
+                                Event.fireEvent(userHBox, mouseEvent);
+
+                                oldMessages.clear();
+                                oldMessages.addAll(newMessages);
+                            }
+                        });
+                    }
+                }, 0, 1000);
             });
 
             userHBox.setOnMouseEntered(event -> {
@@ -279,6 +331,32 @@ public class MainController implements Initializable {
 
             chatVBox.getChildren().add(userHBox);
         }
+    }
+
+    public boolean checkLists(ArrayList<Message> old, ArrayList<Message> newlist){
+        if(old.size() != newlist.size()){
+            return true;
+        }
+        else if(checkEachMsg(old, newlist)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    public boolean checkEachMsg(ArrayList<Message> old, ArrayList<Message> newlist){
+        for(int i=0 ; i<old.size() ; i++){
+            Message oldMsg = old.get(i);
+            Message newMsg = newlist.get(i);
+
+            // Check if any aspect of the messages is different
+            if (!oldMsg.equals(newMsg)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void filltopHBox(String username){
@@ -304,10 +382,11 @@ public class MainController implements Initializable {
         Label usernameLabel = new Label(username);
         usernameLabel.setStyle("-fx-font-size: 20.0;");
 
+
         topHBox.getChildren().addAll(userCircle, usernameLabel);
     }
 
-    public void fillMessageHBox(){
+    public void fillDirectMessageHBox(){
         messageHBox.getChildren().clear();
 
         messageTextField = new TextField();
@@ -322,7 +401,7 @@ public class MainController implements Initializable {
         sendIcon.setFitWidth(38);
 
         sendIcon.setOnMouseClicked(event -> {
-            sendMessage();
+            sendDirectMessage();
         });
 
         sendIcon.setOnMouseEntered(event -> {
@@ -338,7 +417,115 @@ public class MainController implements Initializable {
         StackPane.setMargin(messageHBox, new Insets(632, 0, 0, 494));
     }
 
-    public void sendMessage(){
+    public void fillGroupMessageHBox(){
+        messageHBox.getChildren().clear();
+
+        messageTextField = new TextField();
+        messageTextField.setPromptText("Message");
+        messageTextField.setPrefHeight(48);
+        messageTextField.setPrefWidth(612);
+        messageTextField.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 50px; -fx-padding: 0 0 0 30;");
+        messageTextField.setFont(new Font(17));
+
+        ImageView sendIcon = new ImageView(new Image(getClass().getResourceAsStream("send.png")));
+        sendIcon.setFitHeight(42);
+        sendIcon.setFitWidth(38);
+
+        sendIcon.setOnMouseClicked(event -> {
+            sendGroupMessage();
+        });
+
+        sendIcon.setOnMouseEntered(event -> {
+            sendIcon.setCursor(Cursor.HAND);
+        });
+
+        sendIcon.setOnMouseExited(event -> {
+            sendIcon.setCursor(Cursor.DEFAULT);
+        });
+
+        messageHBox.getChildren().addAll(messageTextField, sendIcon);
+
+        StackPane.setMargin(messageHBox, new Insets(632, 0, 0, 494));
+    }
+
+    public void fillMessageHBoxWithEdit(){
+        messageHBox.getChildren().clear();
+
+        messageTextField = new TextField();
+        messageTextField.setPromptText("Type edited message ... ");
+        messageTextField.setPrefHeight(48);
+        messageTextField.setPrefWidth(612);
+        messageTextField.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 50px; -fx-padding: 0 0 0 30;");
+        messageTextField.setFont(new Font(17));
+
+        ImageView sendIcon = new ImageView(new Image(getClass().getResourceAsStream("send.png")));
+        sendIcon.setFitHeight(42);
+        sendIcon.setFitWidth(38);
+
+        sendIcon.setOnMouseClicked(event -> {
+            String newMsg = messageTextField.getText();
+            messageTextField.clear();
+            int i=0;
+            int f=0;
+            for(Node x : messageVBox.getChildren()) {
+                if(x instanceof VBox){
+                    VBox vbox = (VBox) x;
+                    System.out.println("1");
+
+                    for(Node y : vbox.getChildren()) {
+                        if(y instanceof HBox){
+                            HBox hbox = (HBox) y;
+                            System.out.println("2");
+
+                            if (hbox.equals(targetHBox)) {
+                                Label labelToFind = null;
+                                for (javafx.scene.Node node : topHBox.getChildren()) {
+                                    if (node instanceof Label) {
+                                        labelToFind = (Label) node;
+                                        System.out.println("a");
+                                        break;
+                                    }
+                                    System.out.println("b");
+                                }
+                                System.out.println("c");
+
+                                try{
+                                    client2.editMessage(labelToFind.getText(), i, newMsg);
+                                } catch(Exception e){
+                                    System.out.println("abc");
+                                    e.printStackTrace();
+                                }
+                                f=1;
+                                break;
+                            }
+                            else{
+                                i++;
+                            }
+                        }
+                    }
+
+                    if(f == 1){
+                        break;
+                    }
+                }
+                System.out.println("e");
+            }
+        });
+
+        sendIcon.setOnMouseEntered(event -> {
+            sendIcon.setCursor(Cursor.HAND);
+        });
+
+        sendIcon.setOnMouseExited(event -> {
+            sendIcon.setCursor(Cursor.DEFAULT);
+        });
+
+        messageHBox.getChildren().addAll(messageTextField, sendIcon);
+
+        StackPane.setMargin(messageHBox, new Insets(632, 0, 0, 494));
+    }
+
+    public void sendDirectMessage(){
         if(!messageTextField.getText().isEmpty()){
             String message = messageTextField.getText();
 
@@ -352,8 +539,33 @@ public class MainController implements Initializable {
 
             try{
                 client2.sendDirectMessage(message, labelToFind.getText());
-                addMessageByMe(message, client2.userAccount.getUsername());
+//                addMessageByMe(message, client2.userAccount.getUsername());
             }catch(Exception e){
+                System.out.println("def");
+                e.printStackTrace();
+            }
+
+            messageTextField.clear();
+        }
+    }
+
+    public void sendGroupMessage(){
+        if(!messageTextField.getText().isEmpty()){
+            String message = messageTextField.getText();
+
+            Label labelToFind = null;
+            for (javafx.scene.Node node : topHBox.getChildren()) {
+                if (node instanceof Label) {
+                    labelToFind = (Label) node;
+                    break; // Stop searching once you find the label
+                }
+            }
+
+            try{
+                client2.sendGroupMessage(message, labelToFind.getText());
+//                addMessageByMe(message, client2.userAccount.getUsername());
+            }catch(Exception e){
+                System.out.println("ghi");
                 e.printStackTrace();
             }
 
@@ -416,6 +628,11 @@ public class MainController implements Initializable {
         icon.setFitWidth(19);
         icon.setVisible(false);
 
+        icon.setOnMouseClicked(event -> {
+            targetHBox = hbox;
+            addEditAndDelete();
+        });
+
         icon.setOnMouseEntered(event -> {
             icon.setCursor(Cursor.HAND);
         });
@@ -438,7 +655,7 @@ public class MainController implements Initializable {
 
         Label name = new Label();
         name.setText(sender);
-        name.setAlignment(Pos.CENTER_RIGHT);
+        name.setAlignment(Pos.CENTER_LEFT);
         name.setVisible(false);
         name.setPadding(new Insets(0, 0, 0, 10));
         name.setStyle("-fx-font-size: 1; -fx-text-fill: gray;");
@@ -465,6 +682,11 @@ public class MainController implements Initializable {
         icon.setFitHeight(21);
         icon.setFitWidth(19);
         icon.setVisible(false);
+
+        icon.setOnMouseClicked(event ->{
+            targetHBox = hbox;
+            addEditAndDelete();
+        });
 
         icon.setOnMouseEntered(event -> {
             icon.setCursor(Cursor.HAND);
@@ -497,30 +719,70 @@ public class MainController implements Initializable {
         messageVBox.getChildren().add(vbox);
     }
 
+    public void addEditAndDelete(){
+        ImageView deleteIcon = new ImageView(new Image(getClass().getResourceAsStream("delete.png")));
+        deleteIcon.setFitHeight(24);
+        deleteIcon.setFitWidth(24);
+
+        ImageView editIcon = new ImageView(new Image(getClass().getResourceAsStream("edit.png")));
+        editIcon.setFitHeight(24);
+        editIcon.setFitWidth(24);
+
+        editIcon.setOnMouseClicked(event ->{
+            editMessage();
+            iconHBox.getChildren().clear();
+        });
+
+        editIcon.setOnMouseEntered(event -> {
+            editIcon.setCursor(Cursor.HAND);
+        });
+
+        editIcon.setOnMouseExited(event -> {
+            editIcon.setCursor(Cursor.DEFAULT);
+        });
+
+        deleteIcon.setOnMouseClicked(event ->{
+            deleteMessage();
+            iconHBox.getChildren().clear();
+        });
+
+        deleteIcon.setOnMouseEntered(event -> {
+            deleteIcon.setCursor(Cursor.HAND);
+        });
+
+        deleteIcon.setOnMouseExited(event -> {
+            deleteIcon.setCursor(Cursor.DEFAULT);
+        });
+
+
+
+        iconHBox.getChildren().clear();
+
+        iconHBox.getChildren().addAll(editIcon, deleteIcon);
+    }
+
     public void showProfile(){
-        directChatBtn.setStyle("-fx-background-color: transparent; -fx-cursor: HAND; -fx-alignment: baseline-left; -fx-border-width: 0px 0px 0px 0px; -fx-border-color: #70bef5;");
-        groupChatBtn.setStyle("-fx-background-color: transparent; -fx-cursor: HAND; -fx-alignment: baseline-left; -fx-border-width: 0px 0px 0px 0px; -fx-border-color: #70bef5;");
-        profileBtn.setStyle("-fx-background-color: transparent; -fx-cursor: HAND; -fx-alignment: baseline-left; -fx-border-width: 0px 0px 0px 3px; -fx-border-color: #ffffff;");
+//        directChatBtn.setStyle("-fx-background-color: transparent; -fx-cursor: HAND; -fx-alignment: baseline-left; -fx-border-width: 0px 0px 0px 0px; -fx-border-color: #70bef5;");
+//        groupChatBtn.setStyle("-fx-background-color: transparent; -fx-cursor: HAND; -fx-alignment: baseline-left; -fx-border-width: 0px 0px 0px 0px; -fx-border-color: #70bef5;");
+//        profileBtn.setStyle("-fx-background-color: transparent; -fx-cursor: HAND; -fx-alignment: baseline-left; -fx-border-width: 0px 0px 0px 3px; -fx-border-color: #ffffff;");
 
-        chatVBox.getChildren().clear();
-        topHBox.getChildren().clear();
-        messageHBox.getChildren().clear();
-        messageVBox.getChildren().clear();
+//        chatVBox.getChildren().clear();
+//        topHBox.getChildren().clear();
+//        messageHBox.getChildren().clear();
+//        messageVBox.getChildren().clear();
     }
 
-    public void searchDirectChat(){
-        String user = searchTextField.getText();
+    public void searchDM(){
+        if(!searchTextField.getText().isEmpty()){
+            String user = searchTextField.getText();
 
-        ArrayList<String> pingpong = new ArrayList<>();
-        pingpong.add(user);
-        createDirectChats(pingpong);
-
-
-
-        //logic to get user from that name
+            ArrayList<String> pingpong = new ArrayList<>();
+            pingpong.add(user);
+            createDirectChats(pingpong);
+        }
     }
 
-    public void searchGroupChat(){
+    public void searchGC(){
         String user = searchTextField.getText();
 
         ArrayList<String> pingpong = new ArrayList<>();
@@ -528,8 +790,184 @@ public class MainController implements Initializable {
         createGroupChats(pingpong);
     }
 
-    public void search(){
+    public void createDMSearchBox(){
+        if(!searchHBox.getChildren().isEmpty()){
+            searchHBox.getChildren().clear();
+        }
 
+        ImageView searchIcon = new ImageView(new Image(getClass().getResourceAsStream("search.png")));
+        searchIcon.setFitWidth(32);
+        searchIcon.setFitHeight(32);
+
+        HBox.setMargin(searchIcon, new Insets(27, 0, 0, 5));
+
+        TextField searchTextField = new TextField();
+        searchTextField.setPrefHeight(36);
+        searchTextField.setPrefWidth(202);
+        searchTextField.setPromptText("Search for chats ...");
+        searchTextField.setStyle("-fx-background-color: transparent; -fx-border-width: 0px 0px 2px 0px; -fx-border-color: #70bef5;");
+        searchTextField.setFont(Font.font("Ebrima", 13));
+
+        HBox.setMargin(searchTextField, new Insets(20, 0, 0, 5));
+
+        ImageView searchArrowIcon = new ImageView(new Image(getClass().getResourceAsStream("searchArrow.png")));
+        searchArrowIcon.setFitHeight(32);
+        searchArrowIcon.setFitWidth(32);
+
+        searchArrowIcon.setOnMouseClicked(event -> {
+            searchDM();
+        });
+
+        searchArrowIcon.setOnMouseEntered(event -> {
+            searchArrowIcon.setCursor(Cursor.HAND);
+        });
+
+        searchArrowIcon.setOnMouseExited(event -> {
+            searchArrowIcon.setCursor(Cursor.DEFAULT);
+        });
+
+        ImageView createChatIcon = new ImageView(new Image(getClass().getResourceAsStream("createChat.png")));
+        createChatIcon.setFitHeight(32);
+        createChatIcon.setFitWidth(32);
+
+        createChatIcon.setOnMouseClicked(event -> {
+            createDM();
+        });
+
+        createChatIcon.setOnMouseEntered(event -> {
+            createChatIcon.setCursor(Cursor.HAND);
+        });
+
+        createChatIcon.setOnMouseExited(event -> {
+            createChatIcon.setCursor(Cursor.DEFAULT);
+        });
+
+        VBox searchVBox = new VBox(3);
+
+        HBox.setMargin(searchVBox, new Insets(27, 0, 0, 5));
+
+        searchVBox.getChildren().addAll(searchArrowIcon, createChatIcon);
+        searchHBox.getChildren().addAll(searchIcon, searchTextField, searchVBox);
+    }
+
+    public void createGCSearchBox(){
+        if(!searchHBox.getChildren().isEmpty()){
+            searchHBox.getChildren().clear();
+        }
+
+        ImageView searchIcon = new ImageView(new Image(getClass().getResourceAsStream("search.png")));
+        searchIcon.setFitWidth(32);
+        searchIcon.setFitHeight(32);
+
+        HBox.setMargin(searchIcon, new Insets(27, 0, 0, 5));
+
+        TextField searchTextField = new TextField();
+        searchTextField.setPrefHeight(36);
+        searchTextField.setPrefWidth(202);
+        searchTextField.setPromptText("Search for chats ...");
+        searchTextField.setStyle("-fx-background-color: transparent; -fx-border-width: 0px 0px 2px 0px; -fx-border-color: #70bef5;");
+        searchTextField.setFont(Font.font("Ebrima", 13));
+
+        HBox.setMargin(searchTextField, new Insets(20, 0, 0, 5));
+
+        ImageView searchArrowIcon = new ImageView(new Image(getClass().getResourceAsStream("searchArrow.png")));
+        searchArrowIcon.setFitHeight(32);
+        searchArrowIcon.setFitWidth(32);
+
+        searchArrowIcon.setOnMouseClicked(event -> {
+            searchGC();
+        });
+
+        searchArrowIcon.setOnMouseEntered(event -> {
+            searchArrowIcon.setCursor(Cursor.HAND);
+        });
+
+        searchArrowIcon.setOnMouseExited(event -> {
+            searchArrowIcon.setCursor(Cursor.DEFAULT);
+        });
+
+        ImageView createChatIcon = new ImageView(new Image(getClass().getResourceAsStream("createChat.png")));
+        createChatIcon.setFitHeight(32);
+        createChatIcon.setFitWidth(32);
+
+        createChatIcon.setOnMouseClicked(event -> {
+            createGC();
+        });
+
+        createChatIcon.setOnMouseEntered(event -> {
+            createChatIcon.setCursor(Cursor.HAND);
+        });
+
+        createChatIcon.setOnMouseExited(event -> {
+            createChatIcon.setCursor(Cursor.DEFAULT);
+        });
+
+        VBox searchVBox = new VBox(3);
+
+        HBox.setMargin(searchVBox, new Insets(27, 0, 0, 5));
+
+        searchVBox.getChildren().addAll(searchArrowIcon, createChatIcon);
+        searchHBox.getChildren().addAll(searchIcon, searchTextField, searchVBox);
+    }
+
+    public void createDM(){
+        try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/demo/CreateDM.fxml"));
+
+            Parent root = loader.load();
+
+            CreateDCController controller = loader.getController();
+            controller.setClient(client2);
+
+            Stage secondaryStage = new Stage();
+            Scene scene = new Scene(root);
+            secondaryStage.setScene(scene);
+
+            Stage primaryStage = (Stage) directChatBtn.getScene().getWindow();
+
+            secondaryStage.initModality(Modality.APPLICATION_MODAL);
+
+            secondaryStage.initOwner(primaryStage);
+
+            secondaryStage.show();
+        } catch (Exception e){
+            System.out.println("123");
+            e.printStackTrace();
+        }
+    }
+
+    public void createGC(){
+        try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/demo/CreateGC.fxml"));
+
+            Parent root = loader.load();
+
+            CreateGCController controller = loader.getController();
+            controller.setClient(client2);
+
+            Stage secondaryStage = new Stage();
+            Scene scene = new Scene(root);
+            secondaryStage.setScene(scene);
+
+            Stage primaryStage = (Stage) directChatBtn.getScene().getWindow();
+
+            secondaryStage.initModality(Modality.APPLICATION_MODAL);
+
+            secondaryStage.initOwner(primaryStage);
+
+            secondaryStage.show();
+        } catch (Exception e){
+            System.out.println("456");
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteMessage(){
+
+    }
+
+    public void editMessage(){
+        fillMessageHBoxWithEdit();
     }
 
 }
