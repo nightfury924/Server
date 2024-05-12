@@ -23,72 +23,72 @@ public class ClientHandler implements Runnable{
     private BufferedReader in;
     int changeCount;
 
-    static {
-        Account account = new Account("John Doe", "password123", "johndoe123", "1990-01-01", "johndoe123@example.com");
-        Account account2 = new Account("ABC 123", "password123", "abced123", "1990-01-01", "abc123@example.com");
-        Account account1 = new Account("poing", "password123", "cpoing123", "12-1-2022", "poingkiport@gmail.com");
-
-
-        GroupChat gc1 = new GroupChat("ping pong", "123abc45");
-        GroupChat gc2 = new GroupChat("ping pong31", "12346abc");
-        GroupChat gc3 = new GroupChat("ping123 pong", "123ab4646c");
-        GroupChat gc4 = new GroupChat("ping 43pong", "123a45bc");
-
-        gc3.joinGroup("123ab4646c", "cpoing123");
-        gc3.joinGroup("123ab4646c", "johndoe123");
-        gc3.joinGroup("123ab4646c", "abced123");
-
-        Message gcm1 = new Message("ping123 pong", "cpoing123", false, "hi");
-        Message gcm2 = new Message("ping123 pong", "johndoe123", false, "hello");
-        Message gcm3 = new Message("ping123 pong", "abced123", false, "hallo");
-
-        gc3.messages.add(gcm1);
-        gc3.messages.add(gcm2);
-        gc3.messages.add(gcm3);
-
-        allGroupChats.add(gc1);
-        allGroupChats.add(gc2);
-        allGroupChats.add(gc3);
-        allGroupChats.add(gc4);
-
-        Message m1 = new Message("johndoe123", "cpoing123", true, "hello");
-        Message m2 = new Message("johndoe123", "cpoing123", true, "what r u doing");
-        Message m3 = new Message("cpoing123", "johndoe123", true, "how are you");
-        Message m4 = new Message("cpoing123", "johndoe123", true, "welcome to app");
-        Message m5 = new Message("cpoing123", "johndoe123", true, "123456");
-        Message m6 = new Message("johndoe123", "cpoing123", true, "pooooooooooooooooool");
-        Message m7 = new Message("cpoing123", "johndoe123", true, "nice to meet you");
-
-        Message m8 = new Message("abced123", "cpoing123", true, "i am good");
-        Message m9 = new Message("cpoing123", "abced123", true, "johohohohohoho");
-
-
-        DirectChat dc1 = new DirectChat("johndoe123", "cpoing123",  new Message("johndoe123", "cpoing123", true, "a"));
-        DirectChat dc2 = new DirectChat("abced123", "cpoing123", new Message("abced123", "cpoing123", true, "a"));
-
-        dc1.messages.add(m1);
-        dc1.messages.add(m2);
-        dc1.messages.add(m3);
-        dc1.messages.add(m4);
-        dc1.messages.add(m5);
-        dc1.messages.add(m6);
-        dc1.messages.add(m7);
-
-        dc2.messages.add(m8);
-        dc2.messages.add(m9);
-
-
-        account.direct_chats.add(dc1);
-        account1.direct_chats.add(dc1);
-        account2.direct_chats.add(dc2);
-        account1.direct_chats.add(dc2);
-        allRegisteredAccounts.add(account);
-        allRegisteredAccounts.add(account1);
-        allRegisteredAccounts.add(account2);
-//        allDirectChats.add(dc1);
-//        allDirectChats.add(dc2);
-
-    }
+//    static {
+//        Account account = new Account("John Doe", "password123", "johndoe123", "1990-01-01", "johndoe123@example.com");
+//        Account account2 = new Account("ABC 123", "password123", "abced123", "1990-01-01", "abc123@example.com");
+//        Account account1 = new Account("poing", "password123", "cpoing123", "12-1-2022", "poingkiport@gmail.com");
+//
+//
+//        GroupChat gc1 = new GroupChat("ping pong", "123abc45");
+//        GroupChat gc2 = new GroupChat("ping pong31", "12346abc");
+//        GroupChat gc3 = new GroupChat("ping123 pong", "123ab4646c");
+//        GroupChat gc4 = new GroupChat("ping 43pong", "123a45bc");
+//
+//        gc3.joinGroup("123ab4646c", "cpoing123");
+//        gc3.joinGroup("123ab4646c", "johndoe123");
+//        gc3.joinGroup("123ab4646c", "abced123");
+//
+//        Message gcm1 = new Message("ping123 pong", "cpoing123", false, "hi");
+//        Message gcm2 = new Message("ping123 pong", "johndoe123", false, "hello");
+//        Message gcm3 = new Message("ping123 pong", "abced123", false, "hallo");
+//
+//        gc3.messages.add(gcm1);
+//        gc3.messages.add(gcm2);
+//        gc3.messages.add(gcm3);
+//
+//        allGroupChats.add(gc1);
+//        allGroupChats.add(gc2);
+//        allGroupChats.add(gc3);
+//        allGroupChats.add(gc4);
+//
+//        Message m1 = new Message("johndoe123", "cpoing123", true, "hello");
+//        Message m2 = new Message("johndoe123", "cpoing123", true, "what r u doing");
+//        Message m3 = new Message("cpoing123", "johndoe123", true, "how are you");
+//        Message m4 = new Message("cpoing123", "johndoe123", true, "welcome to app");
+//        Message m5 = new Message("cpoing123", "johndoe123", true, "123456");
+//        Message m6 = new Message("johndoe123", "cpoing123", true, "pooooooooooooooooool");
+//        Message m7 = new Message("cpoing123", "johndoe123", true, "nice to meet you");
+//
+//        Message m8 = new Message("abced123", "cpoing123", true, "i am good");
+//        Message m9 = new Message("cpoing123", "abced123", true, "johohohohohoho");
+//
+//
+//        DirectChat dc1 = new DirectChat("johndoe123", "cpoing123",  new Message("johndoe123", "cpoing123", true, "a"));
+//        DirectChat dc2 = new DirectChat("abced123", "cpoing123", new Message("abced123", "cpoing123", true, "a"));
+//
+//        dc1.messages.add(m1);
+//        dc1.messages.add(m2);
+//        dc1.messages.add(m3);
+//        dc1.messages.add(m4);
+//        dc1.messages.add(m5);
+//        dc1.messages.add(m6);
+//        dc1.messages.add(m7);
+//
+//        dc2.messages.add(m8);
+//        dc2.messages.add(m9);
+//
+//
+//        account.direct_chats.add(dc1);
+//        account1.direct_chats.add(dc1);
+//        account2.direct_chats.add(dc2);
+//        account1.direct_chats.add(dc2);
+//        allRegisteredAccounts.add(account);
+//        allRegisteredAccounts.add(account1);
+//        allRegisteredAccounts.add(account2);
+////        allDirectChats.add(dc1);
+////        allDirectChats.add(dc2);
+//
+//    }
 
 
     public  ClientHandler(Socket socket){
@@ -286,18 +286,20 @@ public class ClientHandler implements Runnable{
     }
 
     private void startNewPrivateChat() throws IOException{
-        String recepientName = in.readLine();
+        String receiver = in.readLine();
+        String sender = this.userAccount.getUsername();
+        DirectChat dc  = new DirectChat(sender,receiver,new Message(sender,receiver,true,"Start of Communication Between "+sender+" + "+receiver+"."));
+        DirectChat dc1 = new DirectChat(sender,receiver,new Message(sender,receiver,true,"Start of Communication Between "+sender+" + "+receiver+"."));
         int i = 0;
-        for(ClientHandler ct : allClients){
-            if(ct.userAccount.getUsername().equals(recepientName)){
-                DirectChat dc = new DirectChat(recepientName, this.userAccount.getUsername(), new Message(recepientName,this.userAccount.getUsername(),true,"Start of messages between "+recepientName+" and "+this.userAccount.getUsername()));
+        for(ClientHandler cl : allClients){
+            if(cl.userAccount.getUsername().equals(receiver)){
                 this.userAccount.direct_chats.add(dc);
-                ct.userAccount.direct_chats.add(dc);
-                ct.out.write("add a new direct chat\n");
-                ct.out.flush();
-                ct.out.write(gson.toJson(dc));
-                ct.out.newLine();
-                ct.out.flush();
+                cl.userAccount.direct_chats.add(dc1);
+                cl.out.write("add a new direct chat\n");
+                cl.out.flush();
+                cl.out.write(gson.toJson(dc1));
+                cl.out.newLine();
+                cl.out.flush();
                 this.out.write("add a new direct chat\n");
                 this.out.flush();
                 this.out.write(gson.toJson(dc));
@@ -309,10 +311,9 @@ public class ClientHandler implements Runnable{
         }
         if(i == 0){
             for (Account account : allRegisteredAccounts) {
-                if(account.getUsername().equals(recepientName)){
-                    DirectChat dc = new DirectChat(recepientName, this.userAccount.getUsername(), new Message(recepientName,this.userAccount.getUsername(),true,"Start of messages between "+recepientName+" and "+this.userAccount.getUsername()));
+                if(account.getUsername().equals(receiver)){
                     this.userAccount.direct_chats.add(dc);
-                    account.direct_chats.add(dc);
+                    account.direct_chats.add(dc1);
                     this.out.write("add a new direct chat\n");
                     this.out.flush();
                     this.out.write(gson.toJson(dc));
@@ -431,15 +432,11 @@ public class ClientHandler implements Runnable{
 
     private void editDirectMessage() throws Exception{
         Message msgToEdit = gson.fromJson(in.readLine(), Message.class);
+        int msgIndex = in.read();
         String newMsg = in.readLine();
         for (DirectChat dc : this.userAccount.direct_chats) {
             if((dc.participants[0].equals(msgToEdit.receiver) || dc.participants[1].equals(msgToEdit.receiver))){
-                for (Message msg : dc.messages) {
-                    if(msg.equals(msgToEdit)){
-                        msg.text = newMsg;
-                        break;
-                    }
-                }
+                dc.messages.get(msgIndex).text = newMsg;
                 break;
             }
         }
@@ -448,7 +445,7 @@ public class ClientHandler implements Runnable{
                 for (DirectChat dc : cl.userAccount.direct_chats) {
                     if((dc.participants[0].equals(msgToEdit.sender) || dc.participants[1].equals(msgToEdit.sender))){
                         for(Message msg : dc.messages){
-                            if(msg.equals(msgToEdit)){
+                            if(msg.text.equals(msgToEdit.text)){
                                 msg.text = newMsg;
                                 break;
                             }
@@ -465,6 +462,40 @@ public class ClientHandler implements Runnable{
                 }
             }
         }
+//        String newMsg = in.readLine();
+//        for (DirectChat dc : this.userAccount.direct_chats) {
+//            if((dc.participants[0].equals(msgToEdit.receiver) || dc.participants[1].equals(msgToEdit.receiver))){
+//                for (Message msg : dc.messages) {
+//                    if(msg.text.equals(msgToEdit.text)){
+//                        msg.text = newMsg;
+//                        break;
+//                    }
+//                }
+//                break;
+//            }
+//        }
+//        for (ClientHandler cl : allClients){
+//            if(cl.userAccount.getUsername().equals(msgToEdit.receiver)){
+//                for (DirectChat dc : cl.userAccount.direct_chats) {
+//                    if((dc.participants[0].equals(msgToEdit.sender) || dc.participants[1].equals(msgToEdit.sender))){
+//                        for(Message msg : dc.messages){
+//                            if(msg.text.equals(msgToEdit.text)){
+//                                msg.text = newMsg;
+//                                break;
+//                            }
+//                        }
+//                        cl.out.write("update direct chat");
+//                        cl.out.newLine();
+//                        cl.out.flush();
+//                        cl.out.write(gson.toJson(dc));
+//                        cl.out.newLine();
+//                        cl.out.flush();
+//                        break;
+//                    }
+//                    break;
+//                }
+//            }
+//        }
     }
 
     private void editGroupMessage() throws Exception{
@@ -533,10 +564,10 @@ public class ClientHandler implements Runnable{
     }
 
     private void addDirectMessageForServer(Message message, Account accountToAddMessage){
-        int i = 0;
+//        int i = 0;
         for (DirectChat dc : accountToAddMessage.direct_chats) {
             if( (dc.participants[0].equals(message.receiver) && dc.participants[1].equals(message.sender) || (dc.participants[1].equals(message.receiver) && dc.participants[0].equals(message.sender) ))){
-                i++;
+//                i++;
                 dc.messages.add(message);
                 break;
             }

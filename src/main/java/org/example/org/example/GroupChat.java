@@ -1,5 +1,6 @@
 package org.example;
 
+import javax.swing.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -16,6 +17,9 @@ public class GroupChat implements Serializable{
         admins = new ArrayList<String>();
         members = new ArrayList<String>();
         messages = new ArrayList<Message>();
+    }
+    public GroupChat(){
+        entranceCode = "";
     }
 
     public boolean isMember(String name){

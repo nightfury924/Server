@@ -9,6 +9,7 @@ import java.util.Scanner;
 public class Server {
     private static final int port = 27508;
     private ServerSocket serverSocket;
+    private static ObjectInputStream objectReader;
 
     public Server(ServerSocket serverSocket){
         this.serverSocket = serverSocket;
@@ -44,8 +45,8 @@ public class Server {
 
     }
     private static void serverStartUp() throws IOException, ClassNotFoundException {
-//        ClientHandler.allRegisteredAccounts = loadUserAccounts();
-//        ClientHandler.allGroupChats = loadGroupChats();
+        ClientHandler.allRegisteredAccounts = loadUserAccounts();
+        ClientHandler.allGroupChats = loadGroupChats();
     }
     private static void serverShutdown() throws IOException {
         for (Account account : ClientHandler.allRegisteredAccounts) {
@@ -83,7 +84,7 @@ public class Server {
         BufferedReader groupNameReader = new BufferedReader(new FileReader("Names/groupChatNames.txt"));
         String groupChatName;
         while(( groupChatName = groupNameReader.readLine()) != null){
-            ObjectInputStream objectReader = new ObjectInputStream(new FileInputStream("GroupChats/"+groupChatName+".bin"));
+            objectReader = new ObjectInputStream(new FileInputStream("GroupChats/"+groupChatName+".bin"));
             groupChats.add( (GroupChat) (objectReader.readObject()) );
             objectReader.close();
         }
@@ -92,17 +93,18 @@ public class Server {
     }
 
     static private void storeGroupChat(GroupChat groupChat) throws IOException {
-        BufferedWriter groupChatWriter = new BufferedWriter(new FileWriter("GroupChats/"+groupChat.groupName+".bin",false));
-        groupChatWriter.write(groupChat.groupName);
-        groupChatWriter.flush();
-        groupChatWriter.close();
+        ObjectOutputStream objectWriter = new ObjectOutputStream(new FileOutputStream("GroupChats/"+groupChat.groupName+".bin"));
+        objectWriter.writeObject(groupChat);
+        objectWriter.flush();
+        objectWriter.close();
     }
+
     static private ArrayList<Account> loadUserAccounts() throws IOException, ClassNotFoundException {
         ArrayList<Account> userAccounts = new ArrayList<>();
         BufferedReader userNameReader = new BufferedReader(new FileReader("Names/userNames.txt"));
         String userName;
         while(( userName = userNameReader.readLine()) != null){
-            ObjectInputStream objectReader = new ObjectInputStream(new FileInputStream("Accounts/"+userName+".bin"));
+            objectReader = new ObjectInputStream(new FileInputStream("Accounts/"+userName+".bin"));
             userAccounts.add((Account) (objectReader.readObject()));
             objectReader.close();
         }
