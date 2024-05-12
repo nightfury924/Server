@@ -119,7 +119,7 @@ public class Client{
     }
 
     public void makeAdmin(GroupChat gp)  throws Exception {
-        gp.displayMembers();
+//        gp.displayMembers();
         int user;
         System.out.print(" Select User to Upgrade to Admin : ");
         user = Client.sc.nextInt();
@@ -169,7 +169,7 @@ public class Client{
     }
 
     public void deleteGroupMessage(GroupChat gp) throws Exception{
-        gp.displayChat();
+//        gp.displayChat();
         System.out.println(" Select Message to Delete");
         int msg_index = Client.sc.nextInt();
         Client.sc.nextLine();
@@ -226,24 +226,21 @@ public class Client{
 
     }
 
-    public void editGroupMessage(String groupName,String message,String newMessage, String sender) throws Exception{
+    public void editGroupMessage(String groupName,int index, String newMessage) throws Exception{
         for (GroupChat gc : userAccount.group_chats) {
             if(gc.groupName.equals(groupName)){
-                for (Message msg : gc.messages) {
-                    if(msg.sender.equals(sender)){
-                        out.write("group message edited");
-                        out.newLine();
-                        out.flush();
-                        out.write(gson.toJson(msg));
-                        out.newLine();
-                        out.flush();
-                        out.write(newMessage);
-                        out.newLine();
-                        out.flush();
-                        msg.text = newMessage;
-                        break;
-                    }
-                }
+                gc.messages.get(index).setText(newMessage);
+                out.write("group message edited");
+                out.newLine();
+                out.flush();
+                out.write(groupName);
+                out.newLine();
+                out.flush();
+                out.write(index);
+                out.flush();
+                out.write(newMessage);
+                out.newLine();
+                out.flush();
                 break;
             }
         }
@@ -260,6 +257,8 @@ public class Client{
                     out.flush();
                     out.write(gson.toJson(msg));
                     out.newLine();
+                    out.flush();
+                    out.write(index);
                     out.flush();
                     out.write(newMsg);
                     out.newLine();
@@ -471,8 +470,8 @@ public class Client{
 
     }
 
-//    public static void main(String[] args) throws UnknownHostException, IOException,Exception {
-//        Application.launch(ClientApplication.class, args);
-//    }
+    public static void main(String[] args) throws UnknownHostException, IOException,Exception {
+        Application.launch(ClientApplication.class, args);
+    }
 
 }

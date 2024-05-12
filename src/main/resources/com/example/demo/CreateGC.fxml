@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.demo.CreateGCController">
+   <children>
+      <Label layoutX="32.0" layoutY="42.0" prefHeight="42.0" prefWidth="213.0" text="Create group chat">
+         <font>
+            <Font name="Ebrima" size="20.0" />
+         </font>
+      </Label>
+      <TextField fx:id="nameTextField" layoutX="32.0" layoutY="84.0" prefHeight="33.0" prefWidth="287.0" promptText="Enter group chat name" style="-fx-background-color: transparent; -fx-border-color: #70bef5; -fx-border-width: 0px 0px 2px 0px;">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </TextField>
+      <ImageView fx:id="createImage" fitHeight="32.0" fitWidth="32.0" layoutX="330.0" layoutY="85.0" onMouseClicked="#createGC" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@searchArrow.png" />
+         </image>
+      </ImageView>
+      <Label fx:id="errorMessage" layoutX="32.0" layoutY="130.0" prefHeight="21.0" prefWidth="238.0" text="Name is too long" textAlignment="CENTER" textFill="#dd0000" visible="false">
+         <font>
+            <Font size="13.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
