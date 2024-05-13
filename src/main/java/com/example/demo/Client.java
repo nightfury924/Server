@@ -168,59 +168,38 @@ public class Client{
         out.flush();
     }
 
-    public void deleteGroupMessage(GroupChat gp) throws Exception{
-//        gp.displayChat();
-        System.out.println(" Select Message to Delete");
-        int msg_index = Client.sc.nextInt();
-        Client.sc.nextLine();
-        if(gp.messages.get(msg_index-1).sender.equals(userAccount.getUsername()) || gp.admins.contains(userAccount.getUsername())){
-            out.write("group message deleted");
-            out.newLine();
-            out.flush();
-            out.write(gp.groupName);
-            out.newLine();
-            out.flush();
-            out.write(gson.toJson(gp.messages.get(msg_index-1)));
-            out.newLine();
-            out.flush();
-            gp.messages.remove(msg_index -1);
+    public void deleteGroupMessage(String groupName, int index) throws Exception{
+        for (GroupChat gc : this.userAccount.group_chats) {
+            if(gc.groupName.equals(groupName)){
+                if(gc.isAdmin(this.userAccount.getUsername()) || gc.messages.get(index).sender.equals(this.userAccount.getUsername()) ){
+                    gc.messages.remove(index);
+                    out.write("group message deleted");
+                    out.newLine();
+                    out.flush();
+                    out.write(groupName);
+                    out.newLine();
+                    out.flush();
+                    out.write(index);
+                    out.flush();
+                    break;
+                }
+            }
         }
-        else{
-            System.out.println(" You can only delete your own message.");
-        }
-
     }
 
-    public void deleteDirectMessage()throws Exception{          // have not implemented out of bound error checking for message deletion as we are going to select message using ui
-        System.out.println(" Select the conversation from which you want to delete:");
-        String reciever = Client.sc.nextLine();
+    public void deleteDirectMessage(String receiver,int index)throws Exception{          // have not implemented out of bound error checking for message deletion as we are going to select message using ui
         for (DirectChat dc : userAccount.direct_chats) {
-            if(dc.participants[0].equals(reciever) || dc.participants[1].equals(reciever)){
-                dc.displayChat();
-                System.out.print("Choose Message to Delete:");
-                int index = Client.sc.nextInt();
-                Client.sc.nextLine();
-                Message msg= dc.messages.get(index-1);
-                dc.messages.remove(msg);
+            if(dc.participants[0].equals(receiver) || dc.participants[1].equals(receiver)){
+                dc.messages.remove(index);
                 out.write("direct message deleted");
                 out.newLine();
                 out.flush();
-                out.write(gson.toJson(msg));
+                out.write(receiver);
                 out.newLine();
                 out.flush();
+                out.write(index);
+                out.flush();
                 break;
-                /*if(msg.sender.equals(this.userAccount.getUsername())){    // delete from both users chat list
-                    dc.messages.remove(msg);
-                    out.write("direct message deleted");
-                    out.newLine();
-                    out.flush();
-                    out.write(gson.toJson(msg));
-                    out.newLine();
-                    out.flush();
-                }
-                else{                                              // delete for only this user as the message is sent by other user
-                    dc.messages.remove(msg);
-                }*/
             }
         }
 

@@ -3,11 +3,9 @@ package com.example.demo;
 import java.io.Serializable;
 
 public class PersonelData implements Serializable {
-    private String name;
     private String username;
     private String dateOfBirth;
-    public PersonelData(String name, String username,String dateOfBirth) {
-        this.name = name;
+    public PersonelData(String username,String dateOfBirth) {
         this.username = username;
         this.dateOfBirth = dateOfBirth;
     }
@@ -19,8 +17,5 @@ public class PersonelData implements Serializable {
     public String getUsername( ) { return username ;}
     public String getDateOfBirth() {
         return dateOfBirth;
-    }
-    public String getName(){
-        return name;
     }
 }

@@ -28,9 +28,9 @@ public class GroupChatStorage {
 //        for(GroupChat gc : allGroupChats){
 //            storeGroupChat(gc);
 //        }
-        Account account = new Account("John Doe", "password123", "johndoe123", "1990-01-01", "johndoe123@example.com");
-        Account account2 = new Account("ABC 123", "password123", "abced123", "1990-01-01", "abc123@example.com");
-        Account account1 = new Account("poing", "password123", "cpoing123", "12-1-2022", "poingkiport@gmail.com");
+        Account account = new Account("password123", "johndoe123", "1990-01-01", "johndoe123@example.com");
+        Account account2 = new Account("password123", "abced123", "1990-01-01", "abc123@example.com");
+        Account account1 = new Account("password123", "cpoing123", "12-1-2022", "poingkiport@gmail.com");
         Message m1 = new Message("johndoe123", "cpoing123", true, "hello");
         Message m2 = new Message("johndoe123", "cpoing123", true, "what r u doing");
         Message m3 = new Message("cpoing123", "johndoe123", true, "how are you");

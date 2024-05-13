@@ -254,7 +254,7 @@ public class LoginController implements Initializable {
 
             System.out.println("here x is " + x);
             if(x == 0){
-                Account  newAccount = new Account("abc",password,username,"1-2-2004",email);
+                Account  newAccount = new Account(password,username,"1-2-2004",email);
                 System.out.println("z");
                 client.out.write(Client.gson.toJson(newAccount));
                 client.out.newLine();

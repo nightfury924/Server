@@ -9,8 +9,8 @@ public class Account extends PersonelData implements Serializable {
     ArrayList<DirectChat>  direct_chats = new ArrayList<>();
     ArrayList<GroupChat> group_chats = new ArrayList<>();
     Message tempMsg;
-    public Account(String name, String password,String userName,String dateOfBirth,String email){
-        super(name,userName,dateOfBirth);
+    public Account(String password,String userName,String dateOfBirth,String email){
+        super(userName,dateOfBirth);
         this.password=password;
         this.email = email;
     }

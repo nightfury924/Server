@@ -418,42 +418,66 @@ public class ClientHandler implements Runnable{
 
     private void deleteGroupMessage() throws Exception{
         String groupChatName = in.readLine();
-        Message msgToDelete = gson.fromJson(in.readLine(), Message.class);
+        int index = in.read();
         for (GroupChat group : allGroupChats) {
             if(group.groupName.equals(groupChatName)){
-                group.messages.remove(msgToDelete);
+                group.messages.remove(index);
                 broadCastUpdatedGroup(group);
             }
         }
     }
 
     private void deleteDirectMessage() throws Exception{
-        Message msgToDelete = gson.fromJson(in.readLine(), Message.class);
+        String receiver = in.readLine();
+        String sender = this.userAccount.getUsername();
+        int index = in.read();
+        int senderMessage = 0;
         for (DirectChat dc : this.userAccount.direct_chats) {
-            if((dc.participants[0].equals(msgToDelete.receiver) || dc.participants[1].equals(msgToDelete.receiver))){
-                dc.messages.remove(msgToDelete);
-                break;
-            }
-        }
-        if(msgToDelete.sender.equals(this.userAccount.getUsername())){
-            for (ClientHandler cl : allClients){
-                if(cl.userAccount.getUsername().equals(msgToDelete.receiver)){
-                    for (DirectChat dc : cl.userAccount.direct_chats) {
-                        if(dc.participants[0].equals(msgToDelete.sender) || dc.participants[1].equals(msgToDelete.sender)){
-                            dc.messages.remove(msgToDelete);
-                            cl.out.write("update direct chat");
-                            cl.out.newLine();
-                            cl.out.flush();
-                            cl.out.write(gson.toJson(dc));
-                            cl.out.newLine();
-                            cl.out.flush();
-                            break;
+            if((dc.participants[0].equals(receiver) || dc.participants[1].equals(receiver))){
+                if(dc.messages.get(index).sender.equals(sender)){
+                    for (ClientHandler cl : allClients){
+                        if(cl.userAccount.getUsername().equals(receiver)){
+                            for (DirectChat directChat : cl.userAccount.direct_chats) {
+                                if(directChat.participants[0].equals(sender) || directChat.participants[1].equals(sender)){
+                                    directChat.messages.remove(index);
+                                    cl.out.write("update direct chat");
+                                    cl.out.newLine();
+                                    cl.out.flush();
+                                    cl.out.write(gson.toJson(directChat));
+                                    cl.out.newLine();
+                                    cl.out.flush();
+                                    senderMessage = 1;
+                                    break;
+                                }
+
+                            }
+                            if(senderMessage==1){
+                                break;
+                            }
+                        }
+                    }
+                    if(senderMessage == 0){
+                        for (Account account : allRegisteredAccounts){
+                            if(account.getUsername().equals(receiver)){
+                                for (DirectChat directChat : account.direct_chats) {
+                                    if(directChat.participants[0].equals(sender) || directChat.participants[1].equals(sender)){
+                                        directChat.messages.remove(index);
+                                        senderMessage = 1;
+                                        break;
+                                    }
+
+                                }
+                                if(senderMessage==1){
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
+                dc.messages.remove(index);
+                break;
             }
         }
-
     }
 
     private void editDirectMessage() throws Exception{

@@ -1979,59 +1979,59 @@ public class MainController implements Initializable {
             e.printStackTrace();
         }
     }
-    public void deleteMessage(){}
-//    public void deleteMessage(){
-//        int i=0;
-//        int f=0;
-//        for(Node x : messageVBox.getChildren()) {
-//            if(x instanceof VBox){
-//                VBox vbox = (VBox) x;
-//                System.out.println("1");
-//
-//                for(Node y : vbox.getChildren()) {
-//                    if(y instanceof HBox){
-//                        HBox hbox = (HBox) y;
-//                        System.out.println("2");
-//
-//                        if (hbox.equals(targetHBox)) {
-//                            Label labelToFind = null;
-//                            for (javafx.scene.Node node : topHBox.getChildren()) {
-//                                if (node instanceof Label) {
-//                                    labelToFind = (Label) node;
-//                                    System.out.println("a");
-//                                    break;
-//                                }
-//                                System.out.println("b");
-//                            }
-//                            System.out.println("c");
-//
-//                            try{
-//                                if(a == 1){
-//                                    client2.deleteDirectMessage(labelToFind.getText(), i);
-//                                }else{
-//                                    client2.deleteGroupMessage(labelToFind.getText(),i);
-//                                }
-//
-//                            } catch(Exception e){
-//                                System.out.println("abc");
-//                                e.printStackTrace();
-//                            }
-//                            f=1;
-//                            break;
-//                        }
-//                        else{
-//                            i++;
-//                        }
-//                    }
-//                }
-//
-//                if(f == 1){
-//                    break;
-//                }
-//            }
-//            System.out.println("e");
-//        }
-//    }
+
+    public void deleteMessage(){
+        int i=0;
+        int f=0;
+        for(Node x : messageVBox.getChildren()) {
+            if(x instanceof VBox){
+                VBox vbox = (VBox) x;
+                System.out.println("1");
+
+                for(Node y : vbox.getChildren()) {
+                    if(y instanceof HBox){
+                        HBox hbox = (HBox) y;
+                        System.out.println("2");
+
+                        if (hbox.equals(targetHBox)) {
+                            Label labelToFind = null;
+                            for (javafx.scene.Node node : topHBox.getChildren()) {
+                                if (node instanceof Label) {
+                                    labelToFind = (Label) node;
+                                    System.out.println("a");
+                                    break;
+                                }
+                                System.out.println("b");
+                            }
+                            System.out.println("c");
+
+                            try{
+                                if(a == 1){
+                                    client2.deleteDirectMessage(labelToFind.getText(), i);
+                                }else{
+                                    client2.deleteGroupMessage(labelToFind.getText(),i);
+                                }
+
+                            } catch(Exception e){
+                                System.out.println("abc");
+                                e.printStackTrace();
+                            }
+                            f=1;
+                            break;
+                        }
+                        else{
+                            i++;
+                        }
+                    }
+                }
+
+                if(f == 1){
+                    break;
+                }
+            }
+            System.out.println("e");
+        }
+    }
 
     public void editMessage(){
         fillMessageHBoxWithEdit();
