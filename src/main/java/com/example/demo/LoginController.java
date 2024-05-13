@@ -25,6 +25,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 // import java.net.URL;
 // import java.util.ResourceBundle;
 
@@ -36,6 +38,8 @@ public class LoginController implements Initializable {
     private String username;
     private String password;
     private String email;
+    private String DOB;
+
     private String confirmPassword;
 
     public static Scanner sc = new Scanner(System.in);
@@ -62,7 +66,7 @@ public class LoginController implements Initializable {
     @FXML
     private PasswordField signupPasswordField;
     @FXML
-    private PasswordField signupConfirmPasswordField;
+    private PasswordField signupDOBField;
     @FXML
     private Label signupUsernameError;
     @FXML
@@ -70,7 +74,7 @@ public class LoginController implements Initializable {
     @FXML
     private Label signupPasswordError;
     @FXML
-    private Label signupConfirmPasswordError;
+    private Label signupDOBError;
     @FXML
     private Label signupFailError;
 
@@ -223,14 +227,18 @@ public class LoginController implements Initializable {
         username = signupUsernameField.getText();
         email = signupEmailField.getText();
         password = signupPasswordField.getText();
-        confirmPassword = signupConfirmPasswordField.getText();
+        DOB = signupDOBField.getText();
 
         signupUsernameError.setVisible(username.length() < 8);
         signupEmailError.setVisible(!email.contains("@") || !email.contains("."));
         signupPasswordError.setVisible(password.length() < 8);
-        signupConfirmPasswordError.setVisible(!password.equals(confirmPassword));
 
-        if(!signupUsernameError.isVisible() && !signupEmailError.isVisible() && !signupPasswordError.isVisible() && !signupConfirmPasswordError.isVisible()){
+        String regex = "\\d{2}/\\d{2}/\\d{4}";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(DOB);
+        signupDOBError.setVisible(!matcher.matches());
+
+        if(!signupUsernameError.isVisible() && !signupEmailError.isVisible() && !signupPasswordError.isVisible() && !signupDOBError.isVisible()){
             client.out.write("signUp\n");
             client.out.flush();
 
@@ -254,7 +262,7 @@ public class LoginController implements Initializable {
 
             System.out.println("here x is " + x);
             if(x == 0){
-                Account  newAccount = new Account(password,username,"1-2-2004",email);
+                Account  newAccount = new Account(password,username,DOB,email);
                 System.out.println("z");
                 client.out.write(Client.gson.toJson(newAccount));
                 client.out.newLine();

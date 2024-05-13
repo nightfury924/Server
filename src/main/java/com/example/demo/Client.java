@@ -8,6 +8,17 @@ import java.util.Scanner;
 import com.google.gson.Gson;
 import javafx.application.Application;
 
+
+//change:
+//deleteMessage() in MainController
+//deleteDirectMessage() in client
+//deleteDirectMessage() in clienthandler
+//changed account name and also in personel data
+//deleteGroupMessage()
+//karna hai
+//clienthandler mai isValidFOrgroupcCreation
+//
+
 public class Client{
     private Socket socket;
     public BufferedReader in;
@@ -18,6 +29,7 @@ public class Client{
     public static final int SERVER_PORT = 27508;
     static Scanner sc = new Scanner(System.in);
     static int vGroupNameVar = 0;
+    static int vDirectNameVar = 0;
     static public int vboxMessageUpdate = 0;
 
     public Client(Socket socket) {
@@ -59,8 +71,14 @@ public class Client{
                             }else{
                                 Client.vGroupNameVar = 2;
                             }
-                        }
-                        else{
+                        }else if(input.equals("validate direct name for direct creation")){
+                            input = in.readLine();
+                            if(input.equals("true")) {
+                                Client.vDirectNameVar = 1;
+                            }else{
+                                Client.vDirectNameVar = 2;
+                            }
+                        }else{
                             msgIncoming = gson.fromJson(input, Message.class);
                             System.out.println(msgIncoming.sender + " : "+ msgIncoming.text);
                             addMessage(msgIncoming);
@@ -188,18 +206,23 @@ public class Client{
     }
 
     public void deleteDirectMessage(String receiver,int index)throws Exception{          // have not implemented out of bound error checking for message deletion as we are going to select message using ui
+
+
         for (DirectChat dc : userAccount.direct_chats) {
             if(dc.participants[0].equals(receiver) || dc.participants[1].equals(receiver)){
-                dc.messages.remove(index);
-                out.write("direct message deleted");
-                out.newLine();
-                out.flush();
-                out.write(receiver);
-                out.newLine();
-                out.flush();
-                out.write(index);
-                out.flush();
-                break;
+                if(dc.messages.get(index).sender.equals(this.userAccount.getUsername())){
+                    dc.messages.remove(index);
+                    out.write("direct message deleted");
+                    out.newLine();
+                    out.flush();
+                    out.write(receiver);
+                    out.newLine();
+                    out.flush();
+                    out.write(index);
+                    out.flush();
+                    break;
+                }
+
             }
         }
 
@@ -358,62 +381,8 @@ public class Client{
 //        return false;
 //    }
 
-//    public boolean signUp() throws Exception{
-//        out.write("signUp\n");
-//        out.flush();
-//        System.out.print("Enter Name : ");
-//        String name = Client.sc.nextLine();
-//        String userName;
-//        do{
-//            System.out.print("Enter UserName : ");
-//            userName = Client.sc.nextLine();
-//            out.write(userName);
-//            out.newLine();
-//            out.flush();
-//            if(!in.readLine().equals("ok")){
-//                System.out.println(" This UserName is Already in Use. Try another.");
-//            }
-//            else{
-//                break;
-//            }
-//        } while(true);
-//        String emailID;
-//        do{
-//            System.out.print("Enter Email ID : ");
-//            emailID = Client.sc.nextLine();
-//            out.write(emailID);
-//            out.newLine();
-//            out.flush();
-//            if(!in.readLine().equals("ok")){
-//                System.out.println(" This Email Address Already in Use. Try another.");
-//            }
-//            else{
-//                break;
-//            }
-//        } while(true);
-//        String password,confirmPassword;
-//        do {
-//            System.out.print("Enter Password : ");
-//            password = Client.sc.nextLine();
-//            System.out.print("Confirm Password : ");
-//            confirmPassword = Client.sc.nextLine();
-//            if(password.equals(confirmPassword)){
-//                break;
-//            }
-//            else{
-//                System.out.println(" Passwords do not match");
-//            }
-//        } while (true);
-//        System.out.println(" Enter Date of Birth (DD-MM-YYYY) : ");
-//        String dateOfBirth = Client.sc.nextLine();
-//        Account  newAccount = new Account(name,password,userName,dateOfBirth,emailID);
-//        out.write(gson.toJson(newAccount));
-//        out.newLine();
-//        out.flush();
-//        userAccount = newAccount;
-//        userAccount.tempMsg = new Message();
-//        return true;
-//    }
+
+
 
 
     public void receiveAccount( )throws IOException{
@@ -434,19 +403,12 @@ public class Client{
     }
 
 
-    public boolean isValid(String username) throws IOException{
+    public void isValid(String username) throws IOException{
         out.write("check validity for new direct chat\n");
         out.flush();
         out.write(username);
-        String response = in.readLine();
-
-        if(response.equals("true")){
-            return true;
-        }
-        else{
-            return false;
-        }
-
+        out.newLine();
+        out.flush();
     }
 
     public static void main(String[] args) throws UnknownHostException, IOException,Exception {

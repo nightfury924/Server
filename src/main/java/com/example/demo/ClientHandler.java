@@ -278,21 +278,21 @@ public class ClientHandler implements Runnable{
             if(account.getUsername().equals(receiver)) {
                 for (DirectChat dc: account.direct_chats) {
                     if( (dc.participants[0].equals(this.userAccount.getUsername() )) ||  dc.participants[1].equals(this.userAccount.getUsername())){
-                        out.write("validate group name for group creation\n");
+                        out.write("validate direct name for direct creation\n");
                         out.flush();
                         out.write("false\n");
                         out.flush();
                         return;
                     }
                 }
-                out.write("validate group name for group creation\n");
+                out.write("validate direct name for direct creation\n");
                 out.flush();
                 out.write("true\n");
                 out.flush();
                 return;
             }
         }
-        out.write("validate group name for group creation\n");
+        out.write("validate direct name for direct creation\n");
         out.flush();
         out.write("false\n");
         out.flush();
@@ -434,28 +434,26 @@ public class ClientHandler implements Runnable{
         int senderMessage = 0;
         for (DirectChat dc : this.userAccount.direct_chats) {
             if((dc.participants[0].equals(receiver) || dc.participants[1].equals(receiver))){
-                if(dc.messages.get(index).sender.equals(sender)){
-                    for (ClientHandler cl : allClients){
-                        if(cl.userAccount.getUsername().equals(receiver)){
-                            for (DirectChat directChat : cl.userAccount.direct_chats) {
-                                if(directChat.participants[0].equals(sender) || directChat.participants[1].equals(sender)){
-                                    directChat.messages.remove(index);
-                                    cl.out.write("update direct chat");
-                                    cl.out.newLine();
-                                    cl.out.flush();
-                                    cl.out.write(gson.toJson(directChat));
-                                    cl.out.newLine();
-                                    cl.out.flush();
-                                    senderMessage = 1;
-                                    break;
-                                }
-
-                            }
-                            if(senderMessage==1){
+                for (ClientHandler cl : allClients){
+                    if(cl.userAccount.getUsername().equals(receiver)){
+                        for (DirectChat directChat : cl.userAccount.direct_chats) {
+                            if(directChat.participants[0].equals(sender) || directChat.participants[1].equals(sender)){
+                                directChat.messages.remove(index);
+                                cl.out.write("update direct chat");
+                                cl.out.newLine();
+                                cl.out.flush();
+                                cl.out.write(gson.toJson(directChat));
+                                cl.out.newLine();
+                                cl.out.flush();
+                                senderMessage = 1;
                                 break;
                             }
                         }
+                        if(senderMessage==1){
+                            break;
+                        }
                     }
+                }
                     if(senderMessage == 0){
                         for (Account account : allRegisteredAccounts){
                             if(account.getUsername().equals(receiver)){
@@ -474,11 +472,11 @@ public class ClientHandler implements Runnable{
                         }
                     }
                 }
-                dc.messages.remove(index);
-                break;
-            }
+            dc.messages.remove(index);
+            break;
         }
     }
+
 
     private void editDirectMessage() throws Exception{
         Message msgToEdit = gson.fromJson(in.readLine(), Message.class);
@@ -531,18 +529,18 @@ public class ClientHandler implements Runnable{
         }
     }
 
-    private void editGroupMessage() throws Exception{
-        String groupName = in.readLine();
-        int index = in.read();
-        String newMsg = in.readLine();
-        for (GroupChat gp : allGroupChats) {
-            if(gp.groupName.equals(groupName)){
-                gp.messages.get(index).text = newMsg;
-                broadCastUpdatedGroup(gp);
-            }
+private void editGroupMessage() throws Exception{
+    String groupName = in.readLine();
+    int index = in.read();
+    String newMsg = in.readLine();
+    for (GroupChat gp : allGroupChats) {
+        if(gp.groupName.equals(groupName)){
+            gp.messages.get(index).text = newMsg;
+            broadCastUpdatedGroup(gp);
         }
-
     }
+
+}
 
     private void sendMessage(Message message) {
         try {
